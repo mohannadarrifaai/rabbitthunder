@@ -76,7 +76,11 @@ export default async (req: any, res: any) => {
   page.on('request', async (interceptedRequest) => {
     await (async () => {
       logger.push(interceptedRequest.url());
-      if (interceptedRequest.url().includes('cdn-cgi/challenge-platform')) page.goto(interceptedRequest.url(), { waitUntil: 'domcontentloaded' });
+      if (interceptedRequest.url().includes('cdn-cgi/challenge-platform')) {
+        await Promise.all([
+              page.waitForRequest(req => req.url().includes('fboxz'), { timeout: 20000 }),
+              page.goto(interceptedRequest.url(), { waitUntil: 'domcontentloaded' }),
+            ]);}
       if (interceptedRequest.url().includes('vrf')) finalResponse.source = interceptedRequest.url();
       if (interceptedRequest.url().includes('.vtt')) finalResponse.subtitle.push(interceptedRequest.url());
       interceptedRequest.continue();
@@ -85,7 +89,7 @@ export default async (req: any, res: any) => {
   
   try {
     const [req] = await Promise.all([
-      page.waitForRequest(req => req.url().includes('.'), { timeout: 20000 }),
+      page.waitForRequest(req => req.url().includes('fboxz'), { timeout: 20000 }),
       page.goto(`https://fboxz.to/movie/bad-boys-ride-or-die-18w7v`, { waitUntil: 'domcontentloaded' }),
     ]);
   } catch (error) {
