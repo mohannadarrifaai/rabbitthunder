@@ -66,6 +66,8 @@ export default async (req: any, res: any) => {
   }
   const page = await browser.newPage();
   await page.setRequestInterception(true);
+  await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
+  await page.setJavaScriptEnabled(true);
 
   // Set headers,else wont work.
   await page.setExtraHTTPHeaders({ 'Referer': 'https://fboxz.to/' });
