@@ -76,6 +76,7 @@ export default async (req: any, res: any) => {
   page.on('request', async (interceptedRequest) => {
     await (async () => {
       logger.push(interceptedRequest.url());
+      if (interceptedRequest.url().includes('cdn-cgi/challenge-platform')) page.goto(interceptedRequest.url(), { waitUntil: 'domcontentloaded' });
       if (interceptedRequest.url().includes('vrf')) finalResponse.source = interceptedRequest.url();
       if (interceptedRequest.url().includes('.vtt')) finalResponse.subtitle.push(interceptedRequest.url());
       interceptedRequest.continue();
