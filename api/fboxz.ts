@@ -70,7 +70,7 @@ export default async (req: any, res: any) => {
   await page.setJavaScriptEnabled(true);
 
   // Set headers,else wont work.
-  await page.setExtraHTTPHeaders({ 'Referer': 'https://fboxz.to/' , 'cookie':'usertype=guest; cf_clearance=akRDHPklzlnUzB6ttahcm.DT1Mluy68mjfbTpEoiUX0-1722722872-1.0.1.1-Stv4dKIrQZgoZo4aZQHS1W4xtOjG1d7bW252aad5p9B.qQ9EB5jClW2g2UH0bncsFlhK6gGtMb8kU6D0h4pihA; sourceVersion=d576481b-64d2-4292-bc60-9a48b65b2e1d priority:u=0, i'});
+  await page.setExtraHTTPHeaders({ 'Referer': 'https://fboxz.to/' , 'cookie':'cf_clearance=akRDHPklzlnUzB6ttahcm.DT1Mluy68mjfbTpEoiUX0-1722722872-1.0.1.1-Stv4dKIrQZgoZo4aZQHS1W4xtOjG1d7bW252aad5p9B.qQ9EB5jClW2g2UH0bncsFlhK6gGtMb8kU6D0h4pihA});
   
   const logger:string[] = [];
   const finalResponse:{source:string,subtitle:string[]} = {source:'',subtitle:[]}
