@@ -76,7 +76,7 @@ export default async (req: any, res: any) => {
   page.on('request', async (interceptedRequest) => {
     await (async () => {
       logger.push(interceptedRequest.url());
-      if (interceptedRequest.url().includes('movie')) finalResponse.source = interceptedRequest.url();
+      if (interceptedRequest.url().includes('vrf')) finalResponse.source = interceptedRequest.url();
       if (interceptedRequest.url().includes('.vtt')) finalResponse.subtitle.push(interceptedRequest.url());
       interceptedRequest.continue();
     })();
@@ -85,7 +85,7 @@ export default async (req: any, res: any) => {
   try {
     const [req] = await Promise.all([
       page.waitForRequest(req => req.url().includes('.'), { timeout: 20000 }),
-      page.goto(`https://fboxz.to/home`, { waitUntil: 'domcontentloaded' }),
+      page.goto(`https://fboxz.to/movie/bad-boys-ride-or-die-18w7v`, { waitUntil: 'domcontentloaded' }),
     ]);
   } catch (error) {
     return res.status(500).end(`Server Error,check the params.`)
