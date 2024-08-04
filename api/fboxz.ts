@@ -68,7 +68,7 @@ export default async (req, res) => {
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36');
 
   // Set headers, else wont work.
-  await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
+  await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.stream/'});
 
   const logger = [];
   const finalResponse = { source: [], subtitle: []};
@@ -82,7 +82,7 @@ export default async (req, res) => {
   });
 
   try {
-    await page.goto(`${id}`, { waitUntil: 'domcontentloaded'});
+    await page.goto(`https://vidsrc.net/srcrcp/NTNhYTY1YmMwMGQwNGVhODQxNjg0MTJjNmMyZjZiZmI6ZDNCdGFrSnlibHB0Tml0U1EycENLMDVyTlc1SVUxRTRkM012TUZWYUwwTjViVWQzZHpkcFVXMXVUbm94WWs0MllXd3lSVUpIV0ZKNU0yOU1OakpUUVZCRE5IVkthM0I0TTJKWGFUTjBOazh5ZUZGdVJVd3pOMkZIWlRFd1VUUk9SRmxzTDJjNFdFTmhPWEV4YjJOWWFXOWhORkY1ZUhSb1lqRldXRFJqYWpoTFV6ZHBia0ZtVFZkbVJucDVhbWRqV1d4UWMyOVdhMk5LTDJoMllVeFNVVVp2SzJvNVlYUmFNRGgzVjNsWldEbG1aSEIyWkU5Q1YwVlNWRWM1VlhsdlJWcE9Ra0pITDNCT2Vrb3JXVEZPTjI4MUszRjVVMDlNUlZWeFNHNXZkSEZQVVhrMlZESnZOMnBpU0ZGaFluSnNTMWwxSzNsV1pXSnFNQzg0VkRZMWJqZEZjVFpOTkhSNVQyOHJSV0ZCUjB0U1NXMTBPR2huYVVsNk9FdHJUbkpLYUdSekwwbzVPREJDYUVGak9VSjJiVGhJV0hWb1pVTXZlVWhuWTJ0SE0wRndTRTlNVlZWc2IwOXZSSEpEVDFWblVsUlZSekJ4WVRJeFJEY3JaRWxKYUdWck0zaGxVSE5TVUhWVFREazRkMDlTVFZwWE1EbHdSVVk0T1hSSFZTOWFNM0JEVGt3d2JFSk1lR1ZwWWtZeGNHb3dSVVJ6U1M5R1NITjJTRTlKTm1oUEsyTnNRMlpQZERkaGRtWkJablZKZHpoNVUydzVVMGxoZGtodVZtRkhZemxtUW00eE5uVmlabmN3WldGSlUzUXhSRFkwZFM5c1F6ZFRVV04xU1V4QlRqUnFNbWRsVkZOSlEyOXhZbVJRVERkSE5UbDFabXBCUkZwWk1GZE1SelF5UmpkUWFrVk1ORkI2ZHpCeVpISkVUMkpsYVdKbEt6aFBSVTl0VkdkWlNHYzNlRGMwZFZCMWEybE5halp1VlhSS2JteGFOMWMyTDA5d1pEZGlNWE5EWmxoa05YaHlNMWhKVVVoUk1uZzFhbWhtUjNCQ1IyWktkRVF3UzNkRFoxSklSRlphYUVnMmJXMXBla2xrTURZNFFVZEZSamhQVlVWdWVVcEpha0p3SzJZeWRVNDJiRmxWYkZSdFowdEZaM3BEYzJNeWVWSnJiQ3RzVWxGVFJqaDNkakJwUkdRd1ZVNXlNVXBJSzNKcVl6ZFRVbkpQYlZOS0sxRjVjRGhwY21WSGMwcFBXa3RYV1VkQlFuUjBiVGRTWXpkdVVIRkZlVzlWVFhwVFZ6TlBORTFaUkZwaFlqaG9aWFZsZFhkbllVTkxMMHQ2WkVkSGNFUk5hbTFRYmxseVMyOXdPWE0xUlRseE1GRjNlRGt3YTJWWUwzWnlOMUJDZFV0bVRsY3dkakZZYVZKV2JtSkNSRE4yYURsRE1FVjBkbmxxZDBRNU5ETTNPSGx6YWxKd1UwNDFLME0zWlRad1ZFaHVhRlV3Y0ZKVlpTdDZkMVZGVEcxRk1UZzRUbFJIUVU1UWJ6bHVUVUV2WVc0d1drVjVOM0ZZVWxkQ2JrMVlSMGc1SzJOaFZVaHZRWGw2U0hKWVQwUmhkR2xMTkZKd1NtWmFjVVJXUW5CRFl6VlRWV1o1UzBkRWVpdHliRGwwU0RGM1VHbFBhMmgzVERsNmNuUmFhemRoVUdwRU5uTXJWVnB3UWtsNFVGRlRSRk5rTUhOa1RTdDVNWGx0ZHowOQ--`, { waitUntil: 'domcontentloaded'});
 
   } catch (error) {
     console.error(`Error during page interaction: ${error}`);
@@ -104,5 +104,5 @@ export default async (req, res) => {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
   console.log(finalResponse);
-  res.json({id:id});
+  res.json(finalResponse);
 };
