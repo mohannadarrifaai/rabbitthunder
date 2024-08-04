@@ -79,24 +79,17 @@ export default async (req, res) => {
     interceptedRequest.continue();
   });
 
-  await page.goto('https://vidsrc.net/embed/movie?tmdb=13');
-  await page.waitForSelector('#player_iframe', { timeout: 5000 });
   try {
-    for (let i = 0; i < 50; i++) {
-      if (closed) {
-        break;
-      }
-      await page.bringToFront();
-      let btn = await page.$('#player_iframe');
-      if (btn && !closed) {
-        btn.click();
-      }
-      await sleep(200);
-    }
-  }
-  catch (e) {
-    if (!closed)
-      console.log(`[x] ${e}`);
+    const [req] = await Promise.all([
+      page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
+      page.goto('https://vidsrc.net/embed/movie?tmdb=13', { waitUntil: 'domcontentloaded' }),
+      page.waitForSelector('#player_iframe', { timeout: 5000 }),
+      page.bringToFront(),
+      let btn = await page.$('#player_iframe'),
+      btn.click(),
+    ]);
+  } catch (error) {
+    return res.status(500).end(`Server Error,check the params.`)
   }
 
   await browser.close();
@@ -115,6 +108,3 @@ export default async (req, res) => {
   console.log(finalResponse);
   res.json(finalResponse);
 };
-
-
-
