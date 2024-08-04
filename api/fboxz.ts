@@ -72,12 +72,12 @@ export default async (req, res) => {
   await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
 
   const logger = [];
-  const finalResponse = { source: '', subtitle: [] };
+  const finalResponse = { source: [], subtitle: [] };
 
   page.on('request', async (interceptedRequest) => {
     logger.push(interceptedRequest.url());
-    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source = interceptedRequest.url();
-    if (interceptedRequest.url().includes('.vtt')) finalResponse.subtitle.push(interceptedRequest.url());
+    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url();
+    if (interceptedRequest.url().includes('.vtt') || interceptedRequest.url().includes('.srt')) finalResponse.subtitle.push(interceptedRequest.url());
     interceptedRequest.continue();
   });
 
@@ -105,5 +105,5 @@ export default async (req, res) => {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
   console.log(finalResponse);
-  res.json(logger);
+  res.json(finalResponse);
 };
