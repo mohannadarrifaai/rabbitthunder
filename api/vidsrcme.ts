@@ -75,7 +75,7 @@ export default async (req, res) => {
 
   page.on('request', async (interceptedRequest) => {
     logger.push(interceptedRequest.url());
-    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url();
+    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url());
     interceptedRequest.continue();
   });
 
