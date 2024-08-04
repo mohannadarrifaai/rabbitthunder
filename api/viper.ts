@@ -71,11 +71,12 @@ export default async (req, res) => {
   await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.pro/'});
 
   const logger = [];
-  const finalResponse = { source: []};
+  const finalResponse = { source: [] as string[], subtitles: [] as string[] };
 
   page.on('request', async (interceptedRequest) => {
     logger.push(interceptedRequest.url());
     if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url());
+    if (interceptedRequest.url().includes('.srt') || (interceptedRequest.url().includes('.vtt')) finalResponse.subtitles.push(interceptedRequest.url());
     interceptedRequest.continue();
   });
 
