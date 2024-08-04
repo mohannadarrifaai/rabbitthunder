@@ -70,7 +70,7 @@ export default async (req: any, res: any) => {
   await page.setJavaScriptEnabled(true);
 
   // Set headers,else wont work.
-  await page.setExtraHTTPHeaders({ 'Referer': 'https://fboxz.to/' , 'cookie':'cf_clearance=akRDHPklzlnUzB6ttahcm.DT1Mluy68mjfbTpEoiUX0-1722722872-1.0.1.1-Stv4dKIrQZgoZo4aZQHS1W4xtOjG1d7bW252aad5p9B.qQ9EB5jClW2g2UH0bncsFlhK6gGtMb8kU6D0h4pihA});
+  await page.setExtraHTTPHeaders({ 'Referer': 'https://fboxz.to/' , 'cookie':'cf_clearance=akRDHPklzlnUzB6ttahcm.DT1Mluy68mjfbTpEoiUX0-1722722872-1.0.1.1-Stv4dKIrQZgoZo4aZQHS1W4xtOjG1d7bW252aad5p9B.qQ9EB5jClW2g2UH0bncsFlhK6gGtMb8kU6D0h4pihA'});
   
   const logger:string[] = [];
   const finalResponse:{source:string,subtitle:string[]} = {source:'',subtitle:[]}
@@ -85,7 +85,7 @@ export default async (req: any, res: any) => {
   try {
     const [req] = await Promise.all([
       page.waitForRequest(req => req.url().includes('fboxz'), { timeout: 20000 }),
-      page.goto(`https://fboxz.to/movie/bad-boys-ride-or-die-18w7v`, { waitUntil: 'domcontentloaded' }),
+      page.goto(`https://fboxz.to/home`, { waitUntil: 'domcontentloaded' }),
     ]);
   } catch (error) {
     return res.status(500).end(`Server Error,check the params.`)
