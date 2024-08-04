@@ -84,7 +84,7 @@ export default async (req: any, res: any) => {
   
   try {
     const [req] = await Promise.all([
-      page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 20000 }),
+      page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 60000 }),
       page.goto(`${id}`, { waitUntil: 'domcontentloaded' }),
     ]);
   } catch (error) {
@@ -105,5 +105,5 @@ export default async (req: any, res: any) => {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   )
   console.log(finalResponse);
-  res.json(finalResponse);
+  res.json(logger);
 };
