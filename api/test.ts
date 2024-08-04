@@ -108,5 +108,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
   console.log(finalResponse);
-  res.json(finalResponse);
+  res.json(logger);
 };
