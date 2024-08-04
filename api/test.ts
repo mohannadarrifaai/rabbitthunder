@@ -80,18 +80,20 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     interceptedRequest.continue();
   });
 
-  try {
-    await Promise.all([
-      page.goto('https://vidsrc.net/embed/movie?tmdb=13', { waitUntil: 'domcontentloaded' }),
-      page.waitForSelector('#player_iframe', { timeout: 200000 }),
-      page.bringToFront(),
-      (async () => {
-        const btn = await page.$('#player_iframe');
-        if (btn) await btn.click();
-      })(),
-    ]);
+try {
+  await page.goto('https://vidsrc.net/embed/movie?tmdb=13', { waitUntil: 'domcontentloaded' });
+  await page.bringToFront();
+  await page.waitForSelector('#player_iframe', { timeout: 200000 });
 
-  } catch (error) {
+  const btn = await page.$('#player_iframe');
+  if (btn) await btn.click();
+
+  const request = await page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 });
+  
+  // You can now handle the request if needed
+  // console.log(request.url());
+
+} catch (error) {
     return res.status(500).end('Server Error, check the params.');
   }
 
