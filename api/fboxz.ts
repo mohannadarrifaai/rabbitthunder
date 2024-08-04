@@ -88,7 +88,7 @@ export default async (req, res) => {
   } catch (error) {
     console.error(`Error during page interaction: ${error}`);
     await browser.close();
-    return res.status(500).end(`Server Error, check the params.`);
+    return res.status(500).end(`Error during page interaction: ${error}`);
   }
 
   await browser.close();
