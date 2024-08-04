@@ -83,16 +83,7 @@ export default async (req, res) => {
 
   try {
     console.log('Navigating to the page...');
-    await page.goto('https://vidsrc.net/embed/movie?tmdb=13', { waitUntil: 'domcontentloaded', timeout: 120000 });
-
-    console.log('Waiting for the button to be visible...');
-    await page.waitForSelector('#pl_but', { visible: true, timeout: 120000 });
-
-    console.log('Clicking the button...');
-    await page.click('#pl_but');
-
-    console.log('Waiting for network requests...');
-    await page.waitForTimeout(10000); // Adjust timeout as needed
+    await page.goto('https://vidsrc.stream/prorcp/ZTA1NTJiNDc5YWJmNjNmYThiZDUyNjgzM2UyNmY5YjE6YlV3MVVGQkVkR012TW0xdVluUlZWRGhUZVhsSFdGbHJiazlrTTBweGJqbDRORFJCTUZad05DODFlRTByZFVoUFFWUmtWVXhoY1dGT1ZrdFlNRXg1YUZWcmFFNVVVVmxHUVRNMk9EazBhV3hzZVVScmRUVTRUMWwzUjNOWlVESnNhMmxqVFZnNGVXaEhZblF4TTFac2RtOUJla3hXYVRacFVqVTJiakEwT1UxV2VGZDFValUxWmtzM1VUaE5halJxWVV4bmFsUjNPVTlPUzA1MGVDc3JNVlJaY2t4dVJEUk9SelZSTmxodVkzWjZWMHg2YTI4emNtVlFiU3RyY2pKT1NGbEZZVXhZU21wblFsbHVUR0pGYTJwdU5qRkNlbkpxVTJKdmVEbGFORU0zZDB3d1QxbHJhVGRhZW5WVFNqRlNSVWRDTnpOeGJGRm9WREI1ZW5kUE9Fa3plRVJMVmtaRFJXbGtWREpzTlhKMk5tdERUVnBFV2pnM0swUjFhbGhsZEdOM09HZ3ljbEJKTUUxUWQxZEdia0ptWjI1SGNFMUlUek14VFRRelNucHdiVVJyTUZCeVpWa3lMelYxZWxKMGRtWXpZa2hRVWs1bFltNHJTSGg0YlVoTWIyaDNUak0wVUdOd1VVZExhVGxDVFVGVmVtUldiazAyZFd4d05GcExVR00wTDBsalZrNHlkSGhTZDBWYU5FMUlWRFV4TlZGWFdYcEhaRU5FZDJwNkwzQjRSV0ZCUlVoVWJUaE9LMk5VWjBSdlZtcHliMk5UYUVrNE1ESmxOR00yZFRSb2VtTk5PSEpQZVhwMFRrVnhhMGREYzFrcmNrdDRSa0UxV21GNU1VdHZPRWRxWXpjMlNtTjNXV0ZxVGxoTmIxa3dUbWxLYzBwRE0wNXNPV3hqZGtwWFJqbEpXa1ZOUW5CWlRIRkNTVXB4YW1SVE1TOUtXVFppYjIxMlpFeHNWVVpwWjBwYWNrVnBRV3RCVUZKSlZuTXlMeTlIVDJKREsyRm1WVkJUTWs1ekwyOUZVSEJsY0hSSGVsRnJNa3hGTm05dVF6bEdNbmg1Wmt4NE4yRlZibXdyTm1Zd05VTnFWMU5aWm1SRFJtTkVXSGhXZDFNMldsUjNNakpJTVhodFUwUXJjRUZxWlVwUlp5OVNOSGhZTVdRemRVODNObnBWTW5jMFRtVjNUQzlJYVU4d1VHSlFWV2RuTUhjMGIyMU9VM1JUUVdoQ2JIQlZOVEp5WmxOWFVteDFabFZsWkU5elFrbFRTVEJIV1ROeFpISkZURVZITDA5dFVYTlJibFJrVEV0UmVsRklXVnBwZWs1b1VsZFFSMWRNUlU4clFpOURUbU5xUVRoVkx6aE5XRzByUVV4V05FWm5jVk5DZEc5eFZHaHZPVzE1UjB4SWNIWktUa1Z1TDFKeU1ERkNjRTFxY0VSS05GaDNkV0pwTTA5SlpYWndVVTFxYlVkdlRWbFBkMU5UT0ZGbGRsbGxNRFZ3VFRCaE5tVkpWMngxUjNJNVEwZEJUM1ZvWWpWaFpERnJhRFY1VnpOd1J6TlRSR2MxZUZWaFNXZDBibUpGTmxnMVJpOXZaRGQxVlVOU1NVMVFlWE0xVlRkSlVEbFdORVkzV1RKMVdGUlRRMGROWVhsNU5VaENjbU5NVlVORlFXRXdSVTE1ZW5GNlYwRXhkSEpsTXpONVJ6RXlXV1ZDTUZWUk16TklTQ3Q0T0M5RGMySlNRV1psZHowOQ--', { waitUntil: 'domcontentloaded', timeout: 5000 });
 
   } catch (error) {
     console.error(`Error during page interaction: ${error}`);
