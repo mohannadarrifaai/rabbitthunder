@@ -1,210 +1,120 @@
-/*
- * The idea is to use the AST of the original script to find the RC4 function
- * Then open a real url, patch the script in a way that the RC4 function 
- * can exfiltrate its parameters (keys) and gather them
- */
+const puppeteer = require('puppeteer-extra');
+const chrome = require('@sparticuz/chromium');
 
-import puppeteer from 'puppeteer-extra'
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+// Stealth plugin issue - There is a good fix but currently this works.
+require('puppeteer-extra-plugin-user-data-dir');
+require('puppeteer-extra-plugin-user-preferences');
+require('puppeteer-extra-plugin-stealth/evasions/chrome.app');
+require('puppeteer-extra-plugin-stealth/evasions/chrome.csi');
+require('puppeteer-extra-plugin-stealth/evasions/chrome.loadTimes');
+require('puppeteer-extra-plugin-stealth/evasions/chrome.runtime');
+require('puppeteer-extra-plugin-stealth/evasions/defaultArgs'); // pkg warned me this one was missing
+require('puppeteer-extra-plugin-stealth/evasions/iframe.contentWindow');
+require('puppeteer-extra-plugin-stealth/evasions/media.codecs');
+require('puppeteer-extra-plugin-stealth/evasions/navigator.hardwareConcurrency');
+require('puppeteer-extra-plugin-stealth/evasions/navigator.languages');
+require('puppeteer-extra-plugin-stealth/evasions/navigator.permissions');
+require('puppeteer-extra-plugin-stealth/evasions/navigator.plugins');
+require('puppeteer-extra-plugin-stealth/evasions/navigator.vendor');
+require('puppeteer-extra-plugin-stealth/evasions/navigator.webdriver');
+require('puppeteer-extra-plugin-stealth/evasions/sourceurl');
+require('puppeteer-extra-plugin-stealth/evasions/user-agent-override');
+require('puppeteer-extra-plugin-stealth/evasions/webgl.vendor');
+require('puppeteer-extra-plugin-stealth/evasions/window.outerdimensions');
+
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-import { executablePath } from 'puppeteer';
-import parser from '@babel/parser';
-import traverse from '@babel/traverse';
-import fs from 'fs';
 
-// watchseries sometimes crashes ... just retry
-const WATCHSERIES = {
-  USER_AGENT: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
-  EXPECTED_KEYS: 5,
-  INJECT_URLS: [
-    "all.js",
-    "embed.js"
-  ],
-  INIT_URL: "https://watchseriesx.to/tv/the-big-bang-theory-jyr9n",
-  BTN_ID: ".movie-btn",
-  MAX_TIMEOUT: 2500
-}
+export default async (req, res) => {
+  let { body, method } = req;
 
-const FLIX2 = {
-  USER_AGENT: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
-  EXPECTED_KEYS: 5,
-  INJECT_URLS: [
-    "all.js",
-    "embed.js"
-  ],
-  INIT_URL: "https://2flix.to/tv/the-big-bang-theory-watch-online-jjgjg/1-1",
-  BTN_ID: ".playnow-btn",
-  MAX_TIMEOUT: 2500
-}
+  // Some header shits
+  if (method !== 'POST') {
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
+    return res.status(200).end();
+  }
 
-const VIDSRC = {
-  // PlayStation bypasses dev tools detection
-  USER_AGENT: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36; PlayStation',
-  EXPECTED_KEYS: 5,
-  INJECT_URLS: [
-    "all.js",
-    "embed.js"
-  ],
-  INIT_URL: "https://vidsrc.to/embed/movie/385687",
-  BTN_ID: "#btn-play",
-  MAX_TIMEOUT: 2500
-}
+  // Some checks...
+  if (!body) return res.status(400).end(`No body provided`);
+  if (typeof body === 'object' && !body.id) return res.status(400).end(`No url provided`);
 
-const VIDSRCME = {
-  // PlayStation bypasses dev tools detection
-  USER_AGENT: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36; PlayStation',
-  EXPECTED_KEYS: 5,
-  INJECT_URLS: [
-    "all.js",
-    "embed.js"
-  ],
-  INIT_URL: "https://vidsrc.me/embed/tv?imdb=tt1190634&season=1&episode=1",
-  BTN_ID: "#player_iframe",
-  MAX_TIMEOUT: 2500
-}
+  const id = body.id;
+  const isProd = process.env.NODE_ENV === 'production';
 
-
-// finding possible names for the rc4 function
-// a new source is not generated since some functions depend on the min algorithm
-// used originally
-function get_rc4_names(source) {
-  const ast = parser.parse(source);
-  let names = [];
-  const MyVisitor = {
-    FunctionDeclaration(path) {
-      let forCount = 0;
-      if (path?.node?.body?.body) {
-        for (let n of path.node.body.body) {
-          if (n.type == 'ForStatement') {
-            forCount++;
-            if (forCount >= 3) {
-              if (path.node.id.name)
-                names.push(path.node.id.name);
-              break;
-            }
-          }
-        }
-      }
-    }
-  };
-
-  traverse.default(ast, MyVisitor);
-  return names;
-}
-
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-async function find_keys(config) {
-  const args = [
-    '--no-sandbox',
-    '--disable-web-security',
-  ];
-
-  const options = {
-    args,
-    executablePath: executablePath(),
-    headless: true,
-  };
-
-  const browser = await puppeteer.launch(options);
-  const page = await browser.newPage()
-
-  let keys = {};
-  let keysNum = 0;
-
-
-  await page.setUserAgent(config.USER_AGENT);
-  await page.setViewport({
-    width: 1080,
-    height: 1080
-  })
+  // create browser based on ENV
+  let browser;
+  if (isProd) {
+    browser = await puppeteer.launch({
+      args: chrome.args,
+      defaultViewport: chrome.defaultViewport,
+      executablePath: await chrome.executablePath(),
+      headless: true,
+      ignoreHTTPSErrors: true
+    });
+  } else {
+    browser = await puppeteer.launch({
+      headless: false,
+      executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    });
+  }
+  const page = await browser.newPage();
   await page.setRequestInterception(true);
-  page.on('request', async (request) => {
-    const url = request.url();
-    if (config.INJECT_URLS.some(v => url.includes(v))) {
-      let host = (new URL(url)).host;
-      let body = await (await fetch(url)).text();
-      const funcNames = get_rc4_names(body);
-      // risky approach since we could modify multiple functions
-      // ... but in the worst case we would just be printing so no harm
-      for (let n of funcNames) {
-        let rep = `function ${n}() {if(arguments){arguments['host']='${host}';console.log(\`S:\${JSON.stringify(arguments)}\`);}`;
-        body = body.replaceAll(`function ${n}() {`, rep);
-        body = body.replaceAll(`function ${n}(){`, rep);
-      }
-      request.respond({
-        status: 200,
-        body: body
-      });
-    } else {
-      request.continue();
-    }
+  await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
+
+  // Set headers, else wont work.
+  await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
+
+  const logger = [];
+  const finalResponse = { source: []};
+
+  page.on('request', async (interceptedRequest) => {
+    logger.push(interceptedRequest.url());
+    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url();
+    interceptedRequest.continue();
   });
 
-  let closed = false;
-  return new Promise(async (resolve) => {
-
-    page
-      .on('console', async (message) => {
-        let t = message.text();
-        if (t.startsWith("S:")) {
-          let j = JSON.parse(t.replace("S:", ""))
-          if (!j['0'])
-            return;
-          if (!keys[j['host']])
-            keys[j['host']] = [];
-          if (!keys[j['host']].includes(j['0'])) {
-            keys[j['host']].push(j['0'])
-            keysNum++;
-          }
-          if (keysNum >= config.EXPECTED_KEYS) {
-            closed = true;
-            if (browser)
-              await browser.close()
-            resolve(keys);
-          }
-        }
-      })
-      .on('error', async (message) => {
-        console.log(`[x] ${message}`);
-      });
-
-    await page.goto(config.INIT_URL);
-    await page.waitForSelector(config.BTN_ID, { timeout: 5_000 });
-    try {
-      for (let i = 0; i < 50; i++) {
-        if (closed) {
-          break;
-        }
-        await page.bringToFront();
-        let btn = await page.$(config.BTN_ID);
-        if (btn && !closed) {
-          btn.click();
-        }
-        await sleep(200);
+  await page.goto('https://vidsrc.net/embed/movie?tmdb=13');
+  await page.waitForSelector('#player_iframe', { timeout: 5000 });
+  try {
+    for (let i = 0; i < 50; i++) {
+      if (closed) {
+        break;
       }
+      await page.bringToFront();
+      let btn = await page.$('#player_iframe');
+      if (btn && !closed) {
+        btn.click();
+      }
+      await sleep(200);
     }
-    catch (e) {
-      if (!closed)
-        console.log(`[x] ${e}`);
-    }
+  }
+  catch (e) {
+    if (!closed)
+      console.log(`[x] ${e}`);
+  }
 
-    if (browser && !closed) {
-      await sleep(config.MAX_TIMEOUT);
-      await browser.close();
-    }
-    resolve(keys);
-  });
+  await browser.close();
 
-}
+  // Response headers.
+  res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate');
+  res.setHeader('Content-Type', 'application/json');
+  // CORS
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+  console.log(finalResponse);
+  res.json(finalResponse);
+};
 
-async function main() {
-  //(await find_keys(VIDSRC));
-  //(await find_keys(VIDSRCME));
-  //(await find_keys(FLIX2));
-  let keys = (await find_keys(WATCHSERIES));
-  fs.writeFileSync("keys.json", JSON.stringify(keys));
-  console.log(`[-] Keys successfully stored in keys.json`);
-}
 
-main();
+
