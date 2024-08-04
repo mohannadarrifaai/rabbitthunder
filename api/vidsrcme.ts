@@ -81,7 +81,7 @@ export default async (req, res) => {
 
   try {
     const [req] = await Promise.all([
-      page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 5000 }),
+      page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 500000 }),
       page.goto(id, { waitUntil: 'networkidle0' }),
     ]);
   } catch (error) {
