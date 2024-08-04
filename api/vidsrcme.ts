@@ -80,12 +80,12 @@ export default async (req, res) => {
   });
 
   try {
-    await page.goto(id, { waitUntil: 'load' });
-
+    const [req] = await Promise.all([
+      page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
+      page.goto(id, { waitUntil: 'domcontentloaded' }),
+    ]);
   } catch (error) {
-    console.error(`Error during page interaction: ${error}`);
-    await browser.close();
-    return res.status(500).end(`Error during page interaction: ${error}`);
+    return res.status(500).end(`Server Error,check the params.`)
   }
 
   await browser.close();
