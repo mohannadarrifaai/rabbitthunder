@@ -83,12 +83,12 @@ export default async (req, res) => {
 
   try {
     console.log('Navigating to the page...');
-    await page.goto('${id}', { waitUntil: 'domcontentloaded', timeout: 10000 });
+    await page.goto(id, { waitUntil: 'domcontentloaded', timeout: 10000 });
 
   } catch (error) {
     console.error(`Error during page interaction: ${error}`);
     await browser.close();
-    return res.status(500).end(`Error during page interaction: ${error}`);
+    return res.status(500).end(`Error during page interaction: ${error} ${id}`);
   }
 
   await browser.close();
