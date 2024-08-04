@@ -80,7 +80,7 @@ export default async (req, res) => {
   });
 
   try {
-    await page.goto(id, { waitUntil: ['domcontentloaded', 'networkidle0'] });
+    await page.goto(id, { waitUntil: 'networkidle0' });
 
   } catch (error) {
     console.error(`Error during page interaction: ${error}`);
