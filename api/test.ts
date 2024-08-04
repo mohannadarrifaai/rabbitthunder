@@ -25,7 +25,7 @@ require('puppeteer-extra-plugin-stealth/evasions/window.outerdimensions');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   let { body, method } = req;
 
   // Some header shits
@@ -41,8 +41,7 @@ export default async (req, res) => {
   }
 
   // Some checks...
-  if (!body) return res.status(400).end(`No body provided`);
-  if (typeof body === 'object' && !body.id) return res.status(400).end(`No url provided`);
+  if (typeof body !== 'object' || !body.id) return res.status(400).end(`No id provided`);
 
   const id = body.id;
   const isProd = process.env.NODE_ENV === 'production';
@@ -75,7 +74,7 @@ export default async (req, res) => {
 
   page.on('request', async (interceptedRequest) => {
     logger.push(interceptedRequest.url());
-    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url();
+    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url());
     interceptedRequest.continue();
   });
 
@@ -84,12 +83,12 @@ export default async (req, res) => {
       page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
       page.goto('https://vidsrc.net/embed/movie?tmdb=13', { waitUntil: 'domcontentloaded' }),
       page.waitForSelector('#player_iframe', { timeout: 5000 }),
-      page.bringToFront(),
-      let btn = await page.$('#player_iframe'),
-      btn.click(),
+      page.bringToFront()
     ]);
+    let btn = await page.$('#player_iframe');
+    btn.click();
   } catch (error) {
-    return res.status(500).end(`Server Error,check the params.`)
+    return res.status(500).end(`Server Error, check the params.`);
   }
 
   await browser.close();
