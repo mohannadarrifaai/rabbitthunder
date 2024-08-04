@@ -70,7 +70,7 @@ export default async (req: any, res: any) => {
   await page.setJavaScriptEnabled(true);
 
   // Set headers,else wont work.
-  await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.me/'});
+  await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
   
   const logger:string[] = [];
   const finalResponse:{source:string,subtitle:string[]} = {source:'',subtitle:[]}
@@ -81,13 +81,23 @@ export default async (req: any, res: any) => {
     if (interceptedRequest.url().includes('.vtt')) finalResponse.subtitle.push(interceptedRequest.url());
     interceptedRequest.continue();
   });
+
+ // await Promise.all([
+ //   page.waitForNavigation(),
+ //   page.click(selector)
+//]);
   
   try {
     const [req] = await Promise.all([
       page.waitForRequest(req => req.url().includes('vidsrc'), { timeout: 20000 }),
-      page.goto(`https://vidsrc.net/embed/movie?tmdb=13`, { waitUntil: 'domcontentloaded' }),
-      page.click('button[id=pl_but]', {waitUntil: 'domcontentloaded'});
+      page.goto('https://vidsrc.net/embed/movie?tmdb=13', { waitUntil: 'domcontentloaded' })
     ]);
+    
+    // Wait for the button to be present in the DOM and clickable
+    await page.waitForSelector('#pl_but', { visible: true });
+    
+    // Click on the button with id 'pl_but'
+    await page.click('#pl_but');
   } catch (error) {
     return res.status(500).end(`Server Error,check the params.`)
   }
