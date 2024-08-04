@@ -46,7 +46,7 @@ export default async (req, res) => {
 
   const id = body.id;
   const isProd = process.env.NODE_ENV === 'production';
-
+  if (id) return res.status(200).end(${id}`);
   // create browser based on ENV
   let browser;
   if (isProd) {
