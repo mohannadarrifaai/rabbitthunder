@@ -81,14 +81,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   });
 
   try {
-    const [request] = await Promise.all([
-      //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
+    await Promise.all([
       page.goto('https://vidsrc.net/embed/movie?tmdb=13', { waitUntil: 'domcontentloaded' }),
       page.waitForSelector('#player_iframe', { timeout: 200000 }),
       page.bringToFront(),
+      (async () => {
+        const btn = await page.$('#player_iframe');
+        if (btn) await btn.click();
+      })(),
     ]);
-    const btn = await page.$('#player_iframe');
-    if (btn) await btn.click();
 
   } catch (error) {
     return res.status(500).end('Server Error, check the params.');
