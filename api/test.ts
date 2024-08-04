@@ -1,5 +1,6 @@
-const puppeteer = require('puppeteer-extra');
-const chrome = require('@sparticuz/chromium');
+import puppeteer from 'puppeteer-extra';
+import chrome from '@sparticuz/chromium';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 // Stealth plugin issue - There is a good fix but currently this works.
 require('puppeteer-extra-plugin-user-data-dir');
@@ -25,12 +26,12 @@ require('puppeteer-extra-plugin-stealth/evasions/window.outerdimensions');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
-export default async (req, res) => {
-  let { body, method } = req;
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+  const { body, method } = req;
 
   // Some header shits
   if (method !== 'POST') {
-    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader(
@@ -41,8 +42,8 @@ export default async (req, res) => {
   }
 
   // Some checks...
-  if (!body) return res.status(400).end(No body provided);
-  if (typeof body === 'object' && !body.id) return res.status(400).end(No url provided);
+  if (!body) return res.status(400).end('No body provided');
+  if (typeof body === 'object' && !body.id) return res.status(400).end('No url provided');
 
   const id = body.id;
   const isProd = process.env.NODE_ENV === 'production';
@@ -70,27 +71,27 @@ export default async (req, res) => {
   // Set headers, else wont work.
   await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
 
-  const logger = [];
-  const finalResponse = { source: []};
+  const logger: string[] = [];
+  const finalResponse = { source: [] as string[] };
 
   page.on('request', async (interceptedRequest) => {
     logger.push(interceptedRequest.url());
-    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url();
+    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url());
     interceptedRequest.continue();
   });
 
   try {
-    const [req] = await Promise.all([
-      page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
+    const [request] = await Promise.all([
+      //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
       page.goto('https://vidsrc.net/embed/movie?tmdb=13', { waitUntil: 'domcontentloaded' }),
-      page.waitForSelector('#player_iframe', { timeout: 5000 }),
+      page.waitForSelector('#player_iframe', { timeout: 200000 }),
       page.bringToFront(),
     ]);
-      let btn = await page.$('#player_iframe');
-      btn.click();
+    const btn = await page.$('#player_iframe');
+    if (btn) await btn.click();
 
   } catch (error) {
-    return res.status(500).end(Server Error,check the params.)
+    return res.status(500).end('Server Error, check the params.');
   }
 
   await browser.close();
@@ -99,7 +100,7 @@ export default async (req, res) => {
   res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate');
   res.setHeader('Content-Type', 'application/json');
   // CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
