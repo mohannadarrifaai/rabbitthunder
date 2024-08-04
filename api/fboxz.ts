@@ -46,7 +46,7 @@ export default async (req, res) => {
 
   const id = body.id;
   const isProd = process.env.NODE_ENV === 'production';
-  if (id) return res.status(200).end(${id}`);
+
   // create browser based on ENV
   let browser;
   if (isProd) {
@@ -71,7 +71,7 @@ export default async (req, res) => {
   await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
 
   const logger = [];
-  const finalResponse = { source: [], subtitle: [] , url: id};
+  const finalResponse = { source: [], subtitle: []};
 
   page.on('request', async (interceptedRequest) => {
     logger.push(interceptedRequest.url());
@@ -104,5 +104,5 @@ export default async (req, res) => {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
   console.log(finalResponse);
-  res.json(finalResponse);
+  res.json({id:id});
 };
