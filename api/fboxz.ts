@@ -2,50 +2,50 @@ const puppeteer = require('puppeteer-extra');
 const chrome = require('@sparticuz/chromium');
 
 // Stealth plugin issue - There is a good fix but currently this works.
-require('puppeteer-extra-plugin-user-data-dir')
-require('puppeteer-extra-plugin-user-preferences')
-require('puppeteer-extra-plugin-stealth/evasions/chrome.app')
-require('puppeteer-extra-plugin-stealth/evasions/chrome.csi')
-require('puppeteer-extra-plugin-stealth/evasions/chrome.loadTimes')
-require('puppeteer-extra-plugin-stealth/evasions/chrome.runtime')
-require('puppeteer-extra-plugin-stealth/evasions/defaultArgs') // pkg warned me this one was missing
-require('puppeteer-extra-plugin-stealth/evasions/iframe.contentWindow')
-require('puppeteer-extra-plugin-stealth/evasions/media.codecs')
-require('puppeteer-extra-plugin-stealth/evasions/navigator.hardwareConcurrency')
-require('puppeteer-extra-plugin-stealth/evasions/navigator.languages')
-require('puppeteer-extra-plugin-stealth/evasions/navigator.permissions')
-require('puppeteer-extra-plugin-stealth/evasions/navigator.plugins')
-require('puppeteer-extra-plugin-stealth/evasions/navigator.vendor')
-require('puppeteer-extra-plugin-stealth/evasions/navigator.webdriver')
-require('puppeteer-extra-plugin-stealth/evasions/sourceurl')
-require('puppeteer-extra-plugin-stealth/evasions/user-agent-override')
-require('puppeteer-extra-plugin-stealth/evasions/webgl.vendor')
-require('puppeteer-extra-plugin-stealth/evasions/window.outerdimensions')
+require('puppeteer-extra-plugin-user-data-dir');
+require('puppeteer-extra-plugin-user-preferences');
+require('puppeteer-extra-plugin-stealth/evasions/chrome.app');
+require('puppeteer-extra-plugin-stealth/evasions/chrome.csi');
+require('puppeteer-extra-plugin-stealth/evasions/chrome.loadTimes');
+require('puppeteer-extra-plugin-stealth/evasions/chrome.runtime');
+require('puppeteer-extra-plugin-stealth/evasions/defaultArgs'); // pkg warned me this one was missing
+require('puppeteer-extra-plugin-stealth/evasions/iframe.contentWindow');
+require('puppeteer-extra-plugin-stealth/evasions/media.codecs');
+require('puppeteer-extra-plugin-stealth/evasions/navigator.hardwareConcurrency');
+require('puppeteer-extra-plugin-stealth/evasions/navigator.languages');
+require('puppeteer-extra-plugin-stealth/evasions/navigator.permissions');
+require('puppeteer-extra-plugin-stealth/evasions/navigator.plugins');
+require('puppeteer-extra-plugin-stealth/evasions/navigator.vendor');
+require('puppeteer-extra-plugin-stealth/evasions/navigator.webdriver');
+require('puppeteer-extra-plugin-stealth/evasions/sourceurl');
+require('puppeteer-extra-plugin-stealth/evasions/user-agent-override');
+require('puppeteer-extra-plugin-stealth/evasions/webgl.vendor');
+require('puppeteer-extra-plugin-stealth/evasions/window.outerdimensions');
 
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-puppeteer.use(StealthPlugin())
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
 
 export default async (req, res) => {
-  let { body, method } = req
+  let { body, method } = req;
 
   // Some header shits
   if (method !== 'POST') {
-    res.setHeader('Access-Control-Allow-Credentials', true)
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader(
       'Access-Control-Allow-Headers',
       'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    )
-    return res.status(200).end()
+    );
+    return res.status(200).end();
   }
 
   // Some checks...
-  if (!body) return res.status(400).end(`No body provided`)
-  if (typeof body === 'object' && !body.id) return res.status(400).end(`No url provided`)
-  
+  if (!body) return res.status(400).end(`No body provided`);
+  if (typeof body === 'object' && !body.id) return res.status(400).end(`No url provided`);
+
   const id = body.id;
-  const isProd = process.env.NODE_ENV === 'production'
+  const isProd = process.env.NODE_ENV === 'production';
 
   // create browser based on ENV
   let browser;
@@ -56,12 +56,12 @@ export default async (req, res) => {
       executablePath: await chrome.executablePath(),
       headless: true,
       ignoreHTTPSErrors: true
-    })
+    });
   } else {
     browser = await puppeteer.launch({
       headless: false,
       executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    })
+    });
   }
   const page = await browser.newPage();
   await page.setRequestInterception(true);
@@ -70,10 +70,10 @@ export default async (req, res) => {
 
   // Set headers, else wont work.
   await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
-  
+
   const logger = [];
-  const finalResponse = { source: '', subtitle: [] }
-  
+  const finalResponse = { source: '', subtitle: [] };
+
   page.on('request', async (interceptedRequest) => {
     logger.push(interceptedRequest.url());
     if (interceptedRequest.url().includes('.m3u8')) finalResponse.source = interceptedRequest.url();
@@ -82,35 +82,37 @@ export default async (req, res) => {
   });
 
   try {
-    await page.goto('https://vidsrc.net/embed/movie?tmdb=13', { waitUntil: 'domcontentloaded' });
-    
-    // Wait for the button to be present in the DOM and clickable
-    await page.waitForSelector('#pl_but', { visible: true });
-    
-    // Click on the button with id 'pl_but'
+    console.log('Navigating to the page...');
+    await page.goto('https://vidsrc.net/embed/movie?tmdb=13', { waitUntil: 'domcontentloaded', timeout: 120000 });
+
+    console.log('Waiting for the button to be visible...');
+    await page.waitForSelector('#pl_but', { visible: true, timeout: 120000 });
+
+    console.log('Clicking the button...');
     await page.click('#pl_but');
-    
-    // Wait for a while to let the requests be made after the button click
-    await page.waitForTimeout(50000); // Adjust timeout as needed
+
+    console.log('Waiting for network requests...');
+    await page.waitForTimeout(10000); // Adjust timeout as needed
 
   } catch (error) {
+    console.error(`Error during page interaction: ${error}`);
     await browser.close();
-    return res.status(500).end(`Server Error, check the params.`)
+    return res.status(500).end(`Server Error, check the params.`);
   }
 
   await browser.close();
 
   // Response headers.
-  res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate')
-  res.setHeader('Content-Type', 'application/json')
+  res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate');
+  res.setHeader('Content-Type', 'application/json');
   // CORS
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
+  );
   console.log(finalResponse);
   res.json(logger);
 };
