@@ -71,7 +71,7 @@ export default async (req, res) => {
   await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
 
   const logger = [];
-  const finalResponse = { source: [], subtitle: [] };
+  const finalResponse = { source: [], subtitle: [] , url: id};
 
   page.on('request', async (interceptedRequest) => {
     logger.push(interceptedRequest.url());
@@ -82,7 +82,7 @@ export default async (req, res) => {
   });
 
   try {
-    await page.goto(`${id}`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await page.goto(`${id}`, { waitUntil: 'domcontentloaded'});
 
   } catch (error) {
     console.error(`Error during page interaction: ${error}`);
