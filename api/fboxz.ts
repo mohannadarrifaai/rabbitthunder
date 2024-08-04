@@ -91,7 +91,7 @@ export default async (req, res) => {
     await page.click('#pl_but');
     
     // Wait for a while to let the requests be made after the button click
-    await page.waitForTimeout(5000); // Adjust timeout as needed
+    await page.waitForTimeout(50000); // Adjust timeout as needed
 
   } catch (error) {
     await browser.close();
