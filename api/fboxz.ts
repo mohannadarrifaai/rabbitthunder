@@ -65,26 +65,24 @@ export default async (req, res) => {
   }
   const page = await browser.newPage();
   await page.setRequestInterception(true);
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
-  await page.setJavaScriptEnabled(true);
+  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36');
 
   // Set headers, else wont work.
   await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
 
   const logger = [];
-  const finalResponse = { source: '', subtitle: [] };
+  const finalResponse = { source: [], subtitle: [] };
 
   page.on('request', async (interceptedRequest) => {
     logger.push(interceptedRequest.url());
-    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source = interceptedRequest.url();
+    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url());
     if (interceptedRequest.url().includes('.vtt') || interceptedRequest.url().includes('.srt')) {
     finalResponse.subtitle.push(interceptedRequest.url());
     interceptedRequest.continue();
   });
 
   try {
-    console.log('Navigating to the page...');
-    await page.goto(`${id}`, { waitUntil: 'domcontentloaded', timeout: 10000 });
+    await page.goto(`${id}`, { waitUntil: 'domcontentloaded', timeout: 20000 });
 
   } catch (error) {
     console.error(`Error during page interaction: ${error}`);
