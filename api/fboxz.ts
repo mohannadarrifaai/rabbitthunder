@@ -82,13 +82,14 @@ export default async (req, res) => {
   });
 
   try {
-    await page.goto(`https://vidsrc.stream/prorcp/YzgxYjcxODE1ODRiZTE5OTlhNjBjNDM2NWE3ODg2M2U6VVVsTWIzRlVOazlHTkhCaE4xVnVVWEEwUVhWaFJrNXJiR1pRUTI5T09HOHZhSFl2YVM5cFIyVk5jMGt5WjNWcWF6UmhMMmx5VkhrM01rZGxaSEpYS3pZd2JYRkhkMWcwVW1GeWNYZHdlRUZsV0ZsV1ZucGFTbGRaTTJZNGMxbFBWak5zYzBaQ1QyaFJabkpoYkM5SWEzRm5ObGhaZG5kb05XcFJWMVJQTURWcWVtUXpSVzVaYkVsV1NITmlUMmRKTVVFM1IzUnRaa0ZrVm5aQ04zWldZWFo0YldaVEsyOHhWMjlLV1VodVVHaE1aa1pUTlZSdllXbGxVRmMxYjI0MVlqZHlaMUpsTWpKQmFGbHZkalF2WVhrMlZVaDFXazh6VkVKS09HUjJNV1pOS3pGVWVWWm1NemxXV25GRFNEVlBUVGN3ZDBkSFJFbFZkalp6Y2padVVGbzNXREVyVUN0ckwwZHBXVzV4UTBsMVprdE9WMmxsV21WSmFtVTVTMFpJWlc1S1prcHNTR2hQWW1GUU5ITnNZa1ZoUzB4VVVTOVNMMVoyZGtkblRsSlFXSFZtUkRKVlQwUTVOV3QxY1hWWlZtaE9NVGhYTDBJeWExVTNTMVpYZGpSd2NuZzNkV00yYTNreFRGbFZWbFZZWXpGMmNXNXphalk1ZVVGR09FZzJZVzlSTlRSRmIxVm5SblZrYWxsWFZETnVTRE42UTNSbWMwcG1kbkpuU3psMFJYWjVOR3RPUzJsaWRIVk9WR00zTkV4Q1JrdGFhM2hLYlU1VVR6QjNVMFExV0djM04zbGlkSGhaV0dWVlYzbFpVekJrWWtVMFNsWlFhMGhQZFRoMk9Hd3dlakJqWkV4RE5HTnpTbHBJU2xWS05sVnVNM1ZzVjBkdFJXbDVTRWhSU1VsTFp6SnJUbkF3VFZsS2JXUnljazFuZW5aMFJWSldZV3gyZFZaTFRtcHplVE52UW1ad0szTm5NbFozWm5OMVVHaGlTekJIYUdJMU1YY3JielJUVFhsNGFtY3dWemR6ZFhOa04wUTVaRWh6TjJ0RlIxTllaV3RwT1d0T2EyOHljVTlVZFdJcmVGSlJNVkkwUTBodFRGaE5NWE5WZFdONGJsUjVPRXhMVVZNMkt6Wk9abEJYTkZwa05XcENkelJJYjJvNVNHeDVTelpoTkRGTlFTOTFNMk1yWTJsUlUzUkJUVmhCVTBOb05VNWFRbU5GZDFVd1kxWk5iMmszUVZGVVdqQXhUV2xrZDJobGRFdGxka0Z6ZGtOaFRHeERSRUZMWjNSRlNrRjFabE5xVEhka2FURnphbTFyWmtsRFUycHJObUp1TDAweE4zZFZRakZOUTJVNGRUWlplVXhTY25Od1RVbG5LelZPZGtaNWJqQXZRVEJsTkhCMmRteENLMEZJTTJ0b2JsbHFNVzExTUVWT2VqQm1jREZqVlVWQ1JuaFljMmRQYzBsR2RrUjVSRUpTVVRCQlZXcFRZbGhqZVRoSGVpc3ZUbFowVVdaWWFFRldVRXhHUkRWWFV6TlNaQ3RWUm5Vd1NGZGtXbFkxV1RCNllXTjRXbk5sYzFveVpHVTRXbTEwZFdOSGRrMWtUVlY0YlROeGMweEhkMDVDUTBSeWEwaFdkSEp0VG5FeGFFbzNhemswZFRrNVRWWXdibGRSUVVSeVJtZzJNbk00Wlc4NGRXbERZUzlCWTJkbksxRnFSV1pqZGl0eGN6aE9aaXQwUVQwOQ--`, { waitUntil: 'domcontentloaded'});
-
+    const [req] = await Promise.all([
+      page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 20000 }),
+      page.goto(`${id}`, { waitUntil: 'domcontentloaded' }),
+    ]);
   } catch (error) {
-    console.error(`Error during page interaction: ${error}`);
-    await browser.close();
-    return res.status(500).end(`Error during page interaction: ${error}`);
+    return res.status(500).end(`Server Error,check the params.`)
   }
+  await browser.close();
 
   await browser.close();
 
