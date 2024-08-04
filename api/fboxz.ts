@@ -1,4 +1,3 @@
-// written by cool-dev-guy
 const puppeteer = require('puppeteer-extra');
 const chrome = require('@sparticuz/chromium');
 
@@ -26,8 +25,8 @@ require('puppeteer-extra-plugin-stealth/evasions/window.outerdimensions')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 puppeteer.use(StealthPlugin())
 
-export default async (req: any, res: any) => {
-  let {body,method} = req
+export default async (req, res) => {
+  let { body, method } = req
 
   // Some header shits
   if (method !== 'POST') {
@@ -55,7 +54,7 @@ export default async (req: any, res: any) => {
       args: chrome.args,
       defaultViewport: chrome.defaultViewport,
       executablePath: await chrome.executablePath(),
-      headless: false,
+      headless: true,
       ignoreHTTPSErrors: true
     })
   } else {
@@ -69,11 +68,11 @@ export default async (req: any, res: any) => {
   await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
   await page.setJavaScriptEnabled(true);
 
-  // Set headers,else wont work.
+  // Set headers, else wont work.
   await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
   
-  const logger:string[] = [];
-  const finalResponse:{source:string,subtitle:string[]} = {source:'',subtitle:[]}
+  const logger = [];
+  const finalResponse = { source: '', subtitle: [] }
   
   page.on('request', async (interceptedRequest) => {
     logger.push(interceptedRequest.url());
@@ -82,32 +81,29 @@ export default async (req: any, res: any) => {
     interceptedRequest.continue();
   });
 
- // await Promise.all([
- //   page.waitForNavigation(),
- //   page.click(selector)
-//]);
-  
   try {
-    const [req] = await Promise.all([
-      page.waitForRequest(req => req.url().includes('vidsrc'), { timeout: 20000 }),
-      page.goto('https://vidsrc.net/embed/movie?tmdb=13', { waitUntil: 'domcontentloaded' })
-    ]);
+    await page.goto('https://vidsrc.net/embed/movie?tmdb=13', { waitUntil: 'domcontentloaded' });
     
     // Wait for the button to be present in the DOM and clickable
     await page.waitForSelector('#pl_but', { visible: true });
     
     // Click on the button with id 'pl_but'
     await page.click('#pl_but');
+    
+    // Wait for a while to let the requests be made after the button click
+    await page.waitForTimeout(5000); // Adjust timeout as needed
+
   } catch (error) {
-    return res.status(500).end(`Server Error,check the params.`)
+    await browser.close();
+    return res.status(500).end(`Server Error, check the params.`)
   }
+
   await browser.close();
 
   // Response headers.
   res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate')
   res.setHeader('Content-Type', 'application/json')
   // CORS
-  // res.setHeader('Access-Control-Allow-Headers', '*')
   res.setHeader('Access-Control-Allow-Credentials', true)
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
