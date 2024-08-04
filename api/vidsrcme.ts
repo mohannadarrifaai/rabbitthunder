@@ -66,7 +66,6 @@ export default async (req, res) => {
   const page = await browser.newPage();
   await page.setRequestInterception(true);
   await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
-  await page.setJavaScriptEnabled(true);
 
   // Set headers, else wont work.
   await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
@@ -81,7 +80,7 @@ export default async (req, res) => {
   });
 
   try {
-    await page.goto(id, { waitUntil: 'domcontentloaded', timeout: 120000 });
+    await page.goto(id, { waitUntil: ['domcontentloaded', 'networkidle0'] });
 
   } catch (error) {
     console.error(`Error during page interaction: ${error}`);
