@@ -1,14 +1,13 @@
 const puppeteer = require('puppeteer-extra');
 const chrome = require('@sparticuz/chromium');
 
-// Stealth plugin issue - There is a good fix but currently this works.
 require('puppeteer-extra-plugin-user-data-dir');
 require('puppeteer-extra-plugin-user-preferences');
 require('puppeteer-extra-plugin-stealth/evasions/chrome.app');
 require('puppeteer-extra-plugin-stealth/evasions/chrome.csi');
 require('puppeteer-extra-plugin-stealth/evasions/chrome.loadTimes');
 require('puppeteer-extra-plugin-stealth/evasions/chrome.runtime');
-require('puppeteer-extra-plugin-stealth/evasions/defaultArgs'); // pkg warned me this one was missing
+require('puppeteer-extra-plugin-stealth/evasions/defaultArgs');
 require('puppeteer-extra-plugin-stealth/evasions/iframe.contentWindow');
 require('puppeteer-extra-plugin-stealth/evasions/media.codecs');
 require('puppeteer-extra-plugin-stealth/evasions/navigator.hardwareConcurrency');
@@ -80,11 +79,15 @@ module.exports = async (req, res) => {
       interceptedRequest.continue();
     });
 
+    page.on('error', (error) => {
+      console.error('Page error:', error);
+    });
+
     try {
-      await page.goto(url, { waitUntil: 'domcontentloaded' });
-      await page.waitForSelector('#pl_but'); // Ensure the selector exists
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await page.waitForSelector('#pl_but', { timeout: 60000 });
       await page.click('#pl_but');
-      await page.waitForTimeout(5000); // Wait for network requests to settle
+      await page.waitForTimeout(10000); // Increase wait time to 10 seconds
     } catch (navigationError) {
       console.error('Error navigating or interacting with page:', navigationError);
       await browser.close();
