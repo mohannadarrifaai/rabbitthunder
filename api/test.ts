@@ -42,9 +42,10 @@ export default async (req, res) => {
 
   // Some checks...
   if (!body) return res.status(400).end(`No body provided`);
-  if (typeof body === 'object' && !body.id) return res.status(400).end(`No url provided`);
+  if (typeof body === 'object' && !body.url) return res.status(400).end(`No url provided`);
 
-  const id = body.id;
+  const url = body.url;
+  const referer = body.referer;
   const isProd = process.env.NODE_ENV === 'production';
 
   // create browser based on ENV
@@ -68,7 +69,7 @@ export default async (req, res) => {
   await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
 
   // Set headers, else wont work.
-  await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
+  await page.setExtraHTTPHeaders({ 'Referer': referer});
 
   const logger = [];
   const finalResponse = { source: []};
@@ -82,7 +83,7 @@ export default async (req, res) => {
   try {
     const [req] = await Promise.all([
       //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
-      page.goto(id, { waitUntil: 'domcontentloaded' }),
+      page.goto(url, { waitUntil: 'domcontentloaded' }),
     ]);
   } catch (error) {
     return res.status(500).end(`Server Error,check the params.`)
