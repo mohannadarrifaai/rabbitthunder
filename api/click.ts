@@ -28,7 +28,6 @@ puppeteer.use(StealthPlugin());
 module.exports = async (req, res) => {
   let { body, method } = req;
 
-  // CORS headers
   if (method !== 'POST') {
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -40,7 +39,6 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
-  // Input validation
   if (!body) return res.status(400).end('No body provided');
   if (typeof body === 'object' && !body.url) return res.status(400).end('No url provided');
 
@@ -51,7 +49,6 @@ module.exports = async (req, res) => {
   let browser = null;
 
   try {
-    // Launch the browser based on the environment
     if (isProd) {
       browser = await puppeteer.launch({
         args: chrome.args,
@@ -83,18 +80,19 @@ module.exports = async (req, res) => {
       interceptedRequest.continue();
     });
 
-    // Navigate to the provided URL
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-    // Click the specified element
-    await page.click('#pl_but');
-
-    // Wait for a while to capture requests
-    await page.waitForTimeout(5000);
+    try {
+      await page.goto(url, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('#pl_but'); // Ensure the selector exists
+      await page.click('#pl_but');
+      await page.waitForTimeout(5000); // Wait for network requests to settle
+    } catch (navigationError) {
+      console.error('Error navigating or interacting with page:', navigationError);
+      await browser.close();
+      return res.status(500).json({ error: 'Error navigating or interacting with page' });
+    }
 
     await browser.close();
 
-    // Set response headers and return the captured URLs
     res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate');
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
