@@ -45,7 +45,7 @@ export default async (req, res) => {
   if (typeof body === 'object' && !body.url) return res.status(400).end(`No url provided`);
 
   const url = body.url;
-  const referer = body.referer;
+  const referer = body.referer || '';
   const isProd = process.env.NODE_ENV === 'production';
 
   // create browser based on ENV
