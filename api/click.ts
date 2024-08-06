@@ -25,7 +25,7 @@ require('puppeteer-extra-plugin-stealth/evasions/window.outerdimensions');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   let { body, method } = req;
 
   // CORS headers
@@ -41,22 +41,23 @@ export default async (req, res) => {
   }
 
   // Input validation
-  if (!body || typeof body !== 'object' || !body.url) {
-    return res.status(400).end('No url provided');
-  }
+  if (!body) return res.status(400).end('No body provided');
+  if (typeof body === 'object' && !body.url) return res.status(400).end('No url provided');
 
   const url = body.url;
   const referer = body.referer || '';
   const isProd = process.env.NODE_ENV === 'production';
 
-  let browser: Browser | null = null;
+  let browser = null;
 
   try {
     // Launch the browser based on the environment
     if (isProd) {
       browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        headless: true,
+        args: chrome.args,
+        defaultViewport: chrome.defaultViewport,
+        executablePath: await chrome.executablePath(),
+        headless: chrome.headless,
         ignoreHTTPSErrors: true,
       });
     } else {
@@ -66,13 +67,13 @@ export default async (req, res) => {
       });
     }
 
-    const page: Page = await browser.newPage();
+    const page = await browser.newPage();
     await page.setRequestInterception(true);
     await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
     await page.setExtraHTTPHeaders({ Referer: referer });
 
-    const logger: string[] = [];
-    const finalResponse: { source: string[] } = { source: [] };
+    const logger = [];
+    const finalResponse = { source: [] };
 
     page.on('request', (interceptedRequest) => {
       logger.push(interceptedRequest.url());
@@ -83,7 +84,7 @@ export default async (req, res) => {
     });
 
     // Navigate to the provided URL
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
 
     // Click the specified element
     await page.click('#pl_but');
