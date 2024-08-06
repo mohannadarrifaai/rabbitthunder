@@ -80,16 +80,16 @@ export default async (req, res) => {
     interceptedRequest.continue();
   });
 
-  try {
-    const [req] = await Promise.all([
-      //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
-      //await page.goto(url, { waitUntil: 'domcontentloaded' }),
-      await page.goto('https://google.com/');
-      await page.click('button + button');
-    ]);
-  } catch (error) {
-    return res.status(500).end(`Server Error,check the params.`)
-  }
+
+  // Navigate to a webpage
+  await page.goto('https://vidsrc.net/embed/movie?tmdb=13');
+
+  // Click the "Submit" button using a CSS selector
+  //await page.click('#pl_but');
+  await page.locator('pl_but').click();
+
+
+
 
   await browser.close();
 
