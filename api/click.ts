@@ -1,36 +1,12 @@
-const puppeteer = require('puppeteer-extra');
-const chrome = require('@sparticuz/chromium');
+import puppeteer, { Browser, Page } from 'puppeteer';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 
-// Stealth plugin issue - There is a good fix but currently this works.
-require('puppeteer-extra-plugin-user-data-dir');
-require('puppeteer-extra-plugin-user-preferences');
-require('puppeteer-extra-plugin-stealth/evasions/chrome.app');
-require('puppeteer-extra-plugin-stealth/evasions/chrome.csi');
-require('puppeteer-extra-plugin-stealth/evasions/chrome.loadTimes');
-require('puppeteer-extra-plugin-stealth/evasions/chrome.runtime');
-require('puppeteer-extra-plugin-stealth/evasions/defaultArgs'); // pkg warned me this one was missing
-require('puppeteer-extra-plugin-stealth/evasions/iframe.contentWindow');
-require('puppeteer-extra-plugin-stealth/evasions/media.codecs');
-require('puppeteer-extra-plugin-stealth/evasions/navigator.hardwareConcurrency');
-require('puppeteer-extra-plugin-stealth/evasions/navigator.languages');
-require('puppeteer-extra-plugin-stealth/evasions/navigator.permissions');
-require('puppeteer-extra-plugin-stealth/evasions/navigator.plugins');
-require('puppeteer-extra-plugin-stealth/evasions/navigator.vendor');
-require('puppeteer-extra-plugin-stealth/evasions/navigator.webdriver');
-require('puppeteer-extra-plugin-stealth/evasions/sourceurl');
-require('puppeteer-extra-plugin-stealth/evasions/user-agent-override');
-require('puppeteer-extra-plugin-stealth/evasions/webgl.vendor');
-require('puppeteer-extra-plugin-stealth/evasions/window.outerdimensions');
+export default async (req: VercelRequest, res: VercelResponse) => {
+  const { body, method } = req;
 
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-puppeteer.use(StealthPlugin());
-
-export default async (req, res) => {
-  let { body, method } = req;
-
-  // Some header shits
+  // CORS headers
   if (method !== 'POST') {
-    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader(
@@ -40,70 +16,77 @@ export default async (req, res) => {
     return res.status(200).end();
   }
 
-  // Some checks...
-  if (!body) return res.status(400).end(`No body provided`);
-  if (typeof body === 'object' && !body.url) return res.status(400).end(`No url provided`);
+  // Input validation
+  if (!body || typeof body !== 'object' || !body.url) {
+    return res.status(400).end('No url provided');
+  }
 
   const url = body.url;
-  const referer = body.referer;
+  const referer = body.referer || '';
   const isProd = process.env.NODE_ENV === 'production';
 
-  // create browser based on ENV
-  let browser;
-  if (isProd) {
-    browser = await puppeteer.launch({
-      args: chrome.args,
-      defaultViewport: chrome.defaultViewport,
-      executablePath: await chrome.executablePath(),
-      headless: false,
-      ignoreHTTPSErrors: true
+  let browser: Browser | null = null;
+
+  try {
+    // Launch the browser based on the environment
+    if (isProd) {
+      browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        headless: true,
+        ignoreHTTPSErrors: true,
+      });
+    } else {
+      browser = await puppeteer.launch({
+        headless: false,
+        executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      });
+    }
+
+    const page: Page = await browser.newPage();
+    await page.setRequestInterception(true);
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
+    await page.setExtraHTTPHeaders({ Referer: referer });
+
+    const logger: string[] = [];
+    const finalResponse: { source: string[] } = { source: [] };
+
+    page.on('request', (interceptedRequest) => {
+      logger.push(interceptedRequest.url());
+      if (interceptedRequest.url().includes('.m3u8')) {
+        finalResponse.source.push(interceptedRequest.url());
+      }
+      interceptedRequest.continue();
     });
-  } else {
-    browser = await puppeteer.launch({
-      headless: false,
-      executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    });
+
+    // Navigate to the provided URL
+    await page.goto(url, { waitUntil: 'networkidle2' });
+
+    // Click the specified element
+    await page.click('#pl_but');
+
+    // Wait for a while to capture requests
+    await page.waitForTimeout(5000);
+
+    await browser.close();
+
+    // Set response headers and return the captured URLs
+    res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate');
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
+
+    console.log(finalResponse);
+    res.json(logger);
+  } catch (error) {
+    if (browser) {
+      await browser.close();
+    }
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
-  const page = await browser.newPage();
-  await page.setRequestInterception(true);
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
-
-  // Set headers, else wont work.
-  await page.setExtraHTTPHeaders({ 'Referer': referer});
-
-  const logger = [];
-  const finalResponse = { source: []};
-
-  page.on('request', async (interceptedRequest) => {
-    logger.push(interceptedRequest.url());
-    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url());
-    interceptedRequest.continue();
-  });
-
-
-  // Navigate to a webpage
-  await page.goto('https://vidsrc.net/embed/movie?tmdb=13');
-
-  // Click the "Submit" button using a CSS selector
-  //await page.click('#pl_but');
-  await page.locator('pl_but').click();
-
-
-
-
-  await browser.close();
-
-  // Response headers.
-  res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate');
-  res.setHeader('Content-Type', 'application/json');
-  // CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
-  console.log(finalResponse);
-  res.json(logger);
 };
