@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer-extra');
 const chrome = require('@sparticuz/chromium');
 
+// Stealth plugin setup
 require('puppeteer-extra-plugin-user-data-dir');
 require('puppeteer-extra-plugin-user-preferences');
 require('puppeteer-extra-plugin-stealth/evasions/chrome.app');
@@ -27,6 +28,7 @@ puppeteer.use(StealthPlugin());
 module.exports = async (req, res) => {
   let { body, method } = req;
 
+  // Handle CORS and method validation
   if (method !== 'POST') {
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -38,6 +40,7 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
+  // Input validation
   if (!body) return res.status(400).end('No body provided');
   if (typeof body === 'object' && !body.url) return res.status(400).end('No url provided');
 
@@ -48,6 +51,7 @@ module.exports = async (req, res) => {
   let browser = null;
 
   try {
+    // Launch browser
     if (isProd) {
       browser = await puppeteer.launch({
         args: chrome.args,
@@ -83,19 +87,36 @@ module.exports = async (req, res) => {
       console.error('Page error:', error);
     });
 
+    // Load page and wait for the selector
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+    console.log('Page loaded successfully');
+
+    // Ensure the element is visible before clicking
     try {
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
       await page.waitForSelector('#pl_but', { timeout: 60000 });
-      await page.click('#pl_but');
-      await page.waitForTimeout(10000); // Increase wait time to 10 seconds
-    } catch (navigationError) {
-      console.error('Error navigating or interacting with page:', navigationError);
+      console.log('Element found');
+    } catch (e) {
+      console.error('Element not found:', e);
       await browser.close();
-      return res.status(500).json({ error: 'Error navigating or interacting with page' });
+      return res.status(500).json({ error: 'Element not found' });
     }
+
+    // Click the button
+    try {
+      await page.click('#pl_but');
+      console.log('Button clicked');
+    } catch (e) {
+      console.error('Error clicking button:', e);
+      await browser.close();
+      return res.status(500).json({ error: 'Error clicking button' });
+    }
+
+    // Wait for a bit to capture network requests
+    await page.waitForTimeout(10000); // 10 seconds
 
     await browser.close();
 
+    // Respond with the captured URLs
     res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate');
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
