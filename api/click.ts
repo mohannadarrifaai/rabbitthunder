@@ -83,8 +83,8 @@ export default async (req, res) => {
   try {
     const [req] = await Promise.all([
       //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
-        await page.goto(url, { waitUntil: 'networkidle0' })
-        await page.waitForSelector('[id="pl_but"]')
+        await page.goto(url, { waitUntil: 'networkidle0' }),
+        await page.waitForSelector('[id="pl_but"]'),
         await page.click('[id="pl_but"]', {waitUntil: 'domcontentloaded'})
     ]);
   } catch (error) {
