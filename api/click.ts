@@ -82,9 +82,10 @@ export default async (req, res) => {
 
   try {
     await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.waitForSelector('#pl_but', { visible: true });
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
-      page.click('#player_iframe'),
+      page.click('#pl_but'),
     ]);
   } catch (error) {
       console.error('Error during page interaction:', error); // Log the error for debugging
