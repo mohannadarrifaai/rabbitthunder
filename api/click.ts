@@ -81,12 +81,14 @@ export default async (req, res) => {
   });
 
   try {
-    const [req] = await Promise.all([
-      //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
-        await page.goto(url, { waitUntil: 'networkidle0' }),
-        await page.waitForSelector('[id="pl_but"]'),
-        await page.click('[id="pl_but"]', {waitUntil: 'domcontentloaded'})
-    ]);
+    // First, go to the URL and wait until the network is idle
+    await page.goto(url, { waitUntil: 'networkidle0' });
+    
+    // Wait for the selector to be present
+    await page.waitForSelector('[id="pl_but"]');
+    
+    // Then click the button
+    await page.click('[id="pl_but"]');
   } catch (error) {
     return res.status(500).end(`Server Error,check the params.`)
   }
