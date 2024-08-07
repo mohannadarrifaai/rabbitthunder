@@ -83,11 +83,12 @@ export default async (req, res) => {
   try {
     await page.goto(url, { waitUntil: 'networkidle2' });
     await Promise.all([
-      page.waitForNavigation(),
+      page.waitForNavigation({ waitUntil: 'networkidle2' }),
       page.click('#pl_but'),
     ]);
   } catch (error) {
-    return res.status(500).end(`Server Error,check the params.`)
+      console.error('Error during page interaction:', error); // Log the error for debugging
+      return res.status(500).end(`Server Error: ${error.message}`);
   }
 
   await browser.close();
