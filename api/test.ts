@@ -83,7 +83,7 @@ export default async (req, res) => {
   try {
     const [req] = await Promise.all([
       //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
-      page.goto(url, { waitUntil: 'networkidle2' }),
+      page.goto(url, { waitUntil: 'domcontentloaded' }),
     ]);
   } catch (error) {
     return res.status(500).end(`Server Error,check the params.`)
