@@ -82,8 +82,10 @@ export default async (req, res) => {
 
   try {
     await page.goto(url, { waitUntil: 'networkidle2' });
-    await page.waitForSelector('#pl_but', { timeout: 10000 });
-    await page.click('#pl_but');
+    await Promise.all([
+      page.waitForNavigation(),
+      page.click('#pl_but'),
+    ]);
   } catch (error) {
     return res.status(500).end(`Server Error,check the params.`)
   }
