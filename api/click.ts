@@ -81,13 +81,8 @@ export default async (req, res) => {
   });
 
   try {
-    // First, go to the URL and wait until the network is idle
-    await page.goto(url, { waitUntil: 'networkidle0' });
-    
-    // Wait for the selector to be present
-    await page.waitForSelector('[id="pl_but"]');
-    
-    // Then click the button
+    await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.waitForSelector('[id="pl_but"]', { timeout: 10000 });
     await page.click('[id="pl_but"]');
   } catch (error) {
     return res.status(500).end(`Server Error,check the params.`)
