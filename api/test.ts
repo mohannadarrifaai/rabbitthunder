@@ -82,7 +82,7 @@ export default async (req, res) => {
 
   try {
     const [req] = await Promise.all([
-      //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
+      page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
       page.goto(url, { waitUntil: 'load' }),
     ]);
   } catch (error) {
