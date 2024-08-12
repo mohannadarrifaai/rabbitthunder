@@ -82,7 +82,7 @@ export default async (req, res) => {
 
     //await page.goto(url, { waitUntil: 'domcontentloaded' });
     await page.goto(url);
-    await page.waitForSelector(".movie-btn", { timeout: 5_000 });
+    await page.waitForSelector(".movie-btn", { timeout: 5000 });
     try {
       for (let i = 0; i < 50; i++) {
         await page.bringToFront();
