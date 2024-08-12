@@ -66,7 +66,7 @@ export default async (req, res) => {
   }
   const page = await browser.newPage();
   await page.setRequestInterception(true);
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
+  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36; PlayStation');
 
   // Set headers, else wont work.
   await page.setExtraHTTPHeaders({ 'Referer': referer});
@@ -84,8 +84,8 @@ export default async (req, res) => {
   //await page.goto(url);
       const [req] = await Promise.all([
       //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
-      page.waitForSelector("#btn-play", { timeout: 200000 });
-      page.goto(url, { waitUntil: 'domcontentloaded' }),
+      page.waitForSelector("#btn-play", { timeout: 200000 }),
+      page.goto(url, { waitUntil: 'domcontentloaded' });
     ]);
     await page.waitForSelector("#btn-play", { timeout: 5_000 });
     try {
