@@ -46,28 +46,26 @@ export default async (req, res) => {
 
   const url = body.url;
   const referer = body.referer;
-  const isProd = process.env.NODE_ENV === 'production';
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   // create browser based on ENV
   let browser;
-  if (isProd) {
-    browser = await puppeteer.launch({
-      args: chrome.args,
-      defaultViewport: chrome.defaultViewport,
-      executablePath: await chrome.executablePath(),
-      headless: true,
-      ignoreHTTPSErrors: true
-    });
-  } else {
-    browser = await puppeteer.launch({
-      headless: false,
-      executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    });
-  }
+    const args = [
+    '--no-sandbox',
+    '--disable-web-security',
+  ];
+    const options = {
+    args,
+    executablePath: process.env.PUPPETEER_EXEC_PATH || executablePath(),
+    headless: true,
+  };
+  const browser = await puppeteer.launch(options);
   const page = await browser.newPage();
   await page.setRequestInterception(true);
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36; PlayStation');
-
+  await page.setViewport({
+    width: 1080,
+    height: 1080
+  })
   // Set headers, else wont work.
   await page.setExtraHTTPHeaders({ 'Referer': referer});
 
