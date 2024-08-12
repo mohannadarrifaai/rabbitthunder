@@ -53,7 +53,7 @@ export default async (req, res) => {
   ];
     const options = {
     args,
-    executablePath: process.env.PUPPETEER_EXEC_PATH || await chrome.executablePath(),
+    executablePath: process.env.PUPPETEER_EXEC_PATH || executablePath(),
     headless: true,
   };
   let browser;
@@ -96,10 +96,8 @@ export default async (req, res) => {
         //console.log(`[x] ${e}`);
     }
 
-    if (browser) {
-      await sleep(2500);
-      await browser.close();
-    }
+  
+  await browser.close();
 
   // Response headers.
   res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate');
