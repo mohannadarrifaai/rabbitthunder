@@ -42,10 +42,9 @@ export default async (req, res) => {
 
   // Some checks...
   if (!body) return res.status(400).end(`No body provided`);
-  if (typeof body === 'object' && !body.url) return res.status(400).end(`No url provided`);
+  if (typeof body === 'object' && !body.id) return res.status(400).end(`No url provided`);
 
-  const url = body.url;
-  const referer = body.referer || '';
+  const id = body.id;
   const isProd = process.env.NODE_ENV === 'production';
 
   // create browser based on ENV
@@ -69,7 +68,7 @@ export default async (req, res) => {
   await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
 
   // Set headers, else wont work.
-  await page.setExtraHTTPHeaders({ 'Referer': referer});
+  await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.net/'});
 
   const logger = [];
   const finalResponse = { source: []};
@@ -80,17 +79,26 @@ export default async (req, res) => {
     interceptedRequest.continue();
   });
 
-  try {
-    await page.goto(url, { waitUntil: 'networkidle2' });
-    await page.waitForSelector('#pl_but', { visible: true });
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: 'networkidle2' }),
-      page.click('#pl_but'),
-    ]);
-  } catch (error) {
-      console.error('Error during page interaction:', error); // Log the error for debugging
-      return res.status(500).end(`Server Error: ${error.message}`);
-  }
+    await page.goto(id);
+    await page.waitForSelector("#btn-play", { timeout: 5_000 });
+    try {
+      //for (let i = 0; i < 50; i++) {
+        //if (closed) {
+          //break;
+        //}
+        await page.bringToFront();
+        let btn = await page.$("#btn-play");
+        if (btn && !closed) {
+          btn.click();
+        }
+        await sleep(200);
+      }
+    }
+    catch (e) {
+      //if (!closed)
+        return res.status(500).end(${e})
+        //console.log(`[x] ${e}`);
+    }
 
   await browser.close();
 
@@ -106,5 +114,5 @@ export default async (req, res) => {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
   console.log(finalResponse);
-  res.json(logger);
+  res.json(finalResponse);
 };
