@@ -80,23 +80,24 @@ export default async (req, res) => {
     interceptedRequest.continue();
   });
 
-    await page.goto(url, { waitUntil: 'networkidle0' });
-    await page.waitForSelector("#btn-play", { timeout: 50000 });
+    //await page.goto(url, { waitUntil: 'networkidle0' });
+  await page.goto(url);
+    await page.waitForSelector("#btn-play", { timeout: 5000 });
     try {
-      for (let i = 0; i < 50; i++) {
+      //for (let i = 0; i < 50; i++) {
         //if (closed) {
           //break;
         //}
         await page.bringToFront();
         let btn = await page.$("#btn-play");
         if (btn) {
-          await Promise.all([
-            page.waitForNavigation({ waitUntil: 'networkidle0' }),
+          //await Promise.all([
+            //page.waitForNavigation({ waitUntil: 'networkidle0' }),
             btn.click()
-          ]);
+          //]);
         }
         await sleep(200);
-      }
+      //}
     }
     catch (e) {
       //if (!closed)
