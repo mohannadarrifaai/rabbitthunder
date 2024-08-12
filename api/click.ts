@@ -47,7 +47,7 @@ export default async (req, res) => {
   const url = body.url;
   const referer = body.referer;
   const isProd = process.env.NODE_ENV === 'production';
-
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
   // create browser based on ENV
   let browser;
   if (isProd) {
@@ -92,13 +92,12 @@ export default async (req, res) => {
         if (btn) {
           btn.click();
         }
-        else {continue}
         await sleep(200);
       }
     }
     catch (e) {
       //if (!closed)
-        return res.status(500).end(${e})
+        return res.status(500).end(`${e}`);
         //console.log(`[x] ${e}`);
     }
 
