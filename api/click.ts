@@ -47,8 +47,6 @@ export default async (req, res) => {
   const url = body.url;
   const referer = body.referer;
   const sleep = ms => new Promise(r => setTimeout(r, ms));
-  // create browser based on ENV
-  let browser;
     const args = [
     '--no-sandbox',
     '--disable-web-security',
