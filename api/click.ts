@@ -80,13 +80,13 @@ export default async (req, res) => {
     interceptedRequest.continue();
   });
 
-    //await page.goto(url, { waitUntil: 'networkidle0' });
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
   //await page.goto(url);
-      const [req] = await Promise.all([
+      //const [req] = await Promise.all([
       //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
-      page.waitForSelector("#btn-play", { timeout: 200000 }),
-      page.goto(url, { waitUntil: 'domcontentloaded' });
-    ]);
+      //page.waitForSelector("#btn-play", { timeout: 200000 }),
+      //page.goto(url, { waitUntil: 'domcontentloaded' });
+    //]);
     await page.waitForSelector("#btn-play", { timeout: 5_000 });
     try {
       for (let i = 0; i < 50; i++) {
@@ -124,5 +124,5 @@ export default async (req, res) => {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
   console.log(finalResponse);
-  res.json(finalResponse);
+  res.json(logger);
 };
