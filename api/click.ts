@@ -81,9 +81,9 @@ export default async (req, res) => {
   });
 
     await page.goto(url);
-    await page.waitForSelector("#btn-play", { timeout: 50000 });
+    await page.waitForSelector("#btn-play", { timeout: 5_000 });
     try {
-      //for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 50; i++) {
         //if (closed) {
           //break;
         //}
@@ -92,8 +92,9 @@ export default async (req, res) => {
         if (btn) {
           btn.click();
         }
+        else {continue}
         await sleep(200);
-      //}
+      }
     }
     catch (e) {
       //if (!closed)
