@@ -81,7 +81,7 @@ export default async (req, res) => {
   });
 
     await page.goto(url, { waitUntil: 'networkidle0' });
-    await page.waitForSelector("#btn-play", { timeout: 5000 });
+    await page.waitForSelector("#btn-play", { timeout: 50000 });
     try {
       for (let i = 0; i < 50; i++) {
         //if (closed) {
@@ -90,7 +90,10 @@ export default async (req, res) => {
         await page.bringToFront();
         let btn = await page.$("#btn-play");
         if (btn) {
-          btn.click();
+          await Promise.all([
+            page.waitForNavigation({ waitUntil: 'networkidle0' }),
+            btn.click()
+          ]);
         }
         await sleep(200);
       }
