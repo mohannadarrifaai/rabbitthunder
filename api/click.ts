@@ -83,17 +83,17 @@ export default async (req, res) => {
     await page.goto(url);
     await page.waitForSelector("#btn-play", { timeout: 50000 });
     try {
-      for (let i = 0; i < 50; i++) {
+      //for (let i = 0; i < 50; i++) {
         //if (closed) {
           //break;
         //}
         await page.bringToFront();
         let btn = await page.$("#btn-play");
-        if (btn && !closed) {
+        if (btn) {
           btn.click();
         }
         await sleep(200);
-      }
+      //}
     }
     catch (e) {
       //if (!closed)
