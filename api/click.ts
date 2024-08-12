@@ -87,7 +87,7 @@ export default async (req, res) => {
       //page.waitForSelector("#btn-play", { timeout: 200000 }),
       //page.goto(url, { waitUntil: 'domcontentloaded' });
     //]);
-    await page.waitForSelector("#btn-play", { timeout: 5_000 });
+    await page.waitForSelector("#btn-play", { timeout: 200000 });
     try {
       for (let i = 0; i < 50; i++) {
         //if (closed) {
