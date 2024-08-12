@@ -55,10 +55,11 @@ export default async (req, res) => {
   ];
     const options = {
     args,
-    executablePath: process.env.PUPPETEER_EXEC_PATH || executablePath(),
+    executablePath: process.env.PUPPETEER_EXEC_PATH || await chrome.executablePath(),
     headless: true,
   };
-  const browser = await puppeteer.launch(options);
+  let browser;
+  browser = await puppeteer.launch(options);
   const page = await browser.newPage();
   await page.setRequestInterception(true);
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36; PlayStation');
@@ -80,16 +81,16 @@ export default async (req, res) => {
 
     //await page.goto(url, { waitUntil: 'domcontentloaded' });
     await page.goto(url);
-    await page.waitForSelector(".movie-btn", { timeout: 5000 });
+    await page.waitForSelector(".movie-btn", { timeout: 50000 });
     try {
-      for (let i = 0; i < 50; i++) {
+      //for (let i = 0; i < 50; i++) {
         await page.bringToFront();
         let btn = await page.$(".movie-btn");
         if (btn) {
           btn.click();
         }
         await sleep(200);
-      }
+      //}
     }
     catch (e) {
       //if (!closed)
@@ -97,7 +98,10 @@ export default async (req, res) => {
         //console.log(`[x] ${e}`);
     }
 
-  await browser.close();
+    if (browser) {
+      await sleep(2500);
+      await browser.close();
+    }
 
   // Response headers.
   res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate');
