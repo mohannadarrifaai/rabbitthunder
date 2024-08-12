@@ -80,26 +80,15 @@ export default async (req, res) => {
     interceptedRequest.continue();
   });
 
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
-  //await page.goto(url);
-      //const [req] = await Promise.all([
-      //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
-      //page.waitForSelector("#btn-play", { timeout: 200000 }),
-      //page.goto(url, { waitUntil: 'domcontentloaded' });
-    //]);
-    await page.waitForSelector("#btn-play", { timeout: 200000 });
+    //await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await page.goto(url);
+    await page.waitForSelector(".movie-btn", { timeout: 5_000 });
     try {
       for (let i = 0; i < 50; i++) {
-        //if (closed) {
-          //break;
-        //}
         await page.bringToFront();
-        let btn = await page.$("#btn-play");
+        let btn = await page.$(".movie-btn");
         if (btn) {
-          //await Promise.all([
-            //page.waitForNavigation({ waitUntil: 'networkidle0' }),
-            btn.click()
-          //]);
+          btn.click();
         }
         await sleep(200);
       }
