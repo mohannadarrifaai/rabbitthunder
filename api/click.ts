@@ -54,7 +54,7 @@ export default async (req, res) => {
   ];
     const options = {
     args,
-    executablePath: process.env.PUPPETEER_EXEC_PATH || executablePath(),
+    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     headless: true,
   };
   let browser;
