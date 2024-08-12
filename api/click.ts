@@ -80,8 +80,8 @@ export default async (req, res) => {
     interceptedRequest.continue();
   });
 
-    await page.goto(url);
-    await page.waitForSelector("#btn-play", { timeout: 5_000 });
+    await page.goto(url, { waitUntil: 'networkidle0' });
+    await page.waitForSelector("#btn-play", { timeout: 5000 });
     try {
       for (let i = 0; i < 50; i++) {
         //if (closed) {
