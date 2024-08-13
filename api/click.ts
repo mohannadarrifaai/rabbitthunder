@@ -46,17 +46,14 @@ export default async (req, res) => {
   const url = body.url;
   const referer = body.referer;
   const sleep = ms => new Promise(r => setTimeout(r, ms));
-  const args = [
-    '--no-sandbox',
-    '--disable-web-security',
-  ];
-  const options = {
-    args,
-    executablePath: await chrome.executablePath(),
-    headless: true,
-  };
-  let browser;
-  browser = await puppeteer.launch(options);
+	let browser
+    browser = await puppeteer.launch({
+      args: chrome.args,
+      defaultViewport: chrome.defaultViewport,
+      executablePath: await chrome.executablePath(),
+      headless: true,
+      ignoreHTTPSErrors: true
+	       });
   const page = await browser.newPage();
   let keys = {};
   await page.setRequestInterception(true);
