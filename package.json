@@ -9,6 +9,7 @@
   "author": "cool-dev-guy",
   "license": "GPLv3",
   "dependencies": {
+    "express": "",
     "@sparticuz/chromium":"",
     "@babel/parser": "",
     "@babel/traverse": "",
