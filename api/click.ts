@@ -1,9 +1,6 @@
 const puppeteer = require('puppeteer-extra');
 const chrome = require('@sparticuz/chromium');
 
-// Stealth plugin issue - There is a good fix but currently this works.
-const { executablePath } = require('puppeteer');
-
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
@@ -35,7 +32,7 @@ export default async (req, res) => {
   ];
     const options = {
     args,
-    executablePath: executablePath,
+    executablePath: await chrome.executablePath(),
     headless: true,
   };
   let browser;
