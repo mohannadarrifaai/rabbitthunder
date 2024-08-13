@@ -41,6 +41,7 @@ export default async (req, res) => {
   let browser;
   browser = await puppeteer.launch(options);
   const page = await browser.newPage();
+  let keys = {};
   await page.setRequestInterception(true);
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36; PlayStation');
   await page.setViewport({
@@ -60,7 +61,7 @@ export default async (req, res) => {
       request.continue();
   });
   // return new Promise(async (resolve) => {
-
+return new Promise(async (resolve) => {
     await page.goto(url, { waitUntil: 'networkidle0' });
     await page.waitForSelector("#btn-play", { timeout: 50000 });
     try {
@@ -76,7 +77,8 @@ export default async (req, res) => {
     catch (e) {
        return res.status(500).end(`${e}`);
     }
-
+    resolve(keys);
+  });
     if (browser) {
       await sleep(2500);
       await browser.close();
