@@ -69,7 +69,7 @@ export default async (req, res) => {
   page.on('request', async (request) => {
 	return new Promise(async (resolve) => {
     await page.goto(url, { waitUntil: 'networkidle0' });
-    await page.waitForSelector("#btn-play", { timeout: 50000 });
+    await page.waitForSelector("#btn-play", { timeout: 500000 });
     try {
       for (let i = 0; i < 5; i++) {
         await page.bringToFront();
