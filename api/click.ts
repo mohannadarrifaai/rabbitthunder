@@ -50,36 +50,37 @@ export default async (req, res) => {
   // Set headers, else wont work.
   await page.setExtraHTTPHeaders({ 'Referer': referer});
 
+  await page.setRequestInterception(true);
   const logger = [];
   const finalResponse = { source: []};
-
-  page.on('request', async (interceptedRequest) => {
-    logger.push(interceptedRequest.url());
-    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url());
-    interceptedRequest.continue();
+  page.on('request', async (request) => {
+    logger.push(request.url());
+    if (request.url().includes('.m3u8')) finalResponse.source.push(request.url());
+    // console.log(request.url());
+      request.continue();
   });
+  // return new Promise(async (resolve) => {
 
-    //await page.goto(url, { waitUntil: 'domcontentloaded' });
-    await page.goto(url);
-    await page.waitForSelector(".movie-btn", { timeout: 50000 });
+    await page.goto(url, { waitUntil: 'networkidle0' });
+    await page.waitForSelector("#btn-play", { timeout: 50000 });
     try {
-      //for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 5; i++) {
         await page.bringToFront();
-        let btn = await page.$(".movie-btn");
+        let btn = await page.$("#btn-play");
         if (btn) {
           btn.click();
-        }
-        await sleep(200);
-      //}
+      }
+        await sleep(10000);
+    }
     }
     catch (e) {
-      //if (!closed)
-        return res.status(500).end(`${e}`);
-        //console.log(`[x] ${e}`);
+       return res.status(500).end(`${e}`);
     }
 
-  
-  await browser.close();
+    if (browser) {
+      await sleep(2500);
+      await browser.close();
+    }
 
   // Response headers.
   res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate');
