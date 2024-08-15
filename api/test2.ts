@@ -88,19 +88,28 @@ function sleep(ms) {
 } 
   
 try {
-  await page.goto(url, { waitUntil: 'networkidle0' });
-  await page.waitForSelector(".movie-btn", { visible: true });
+  // Use Promise.all to wait for both the page to load and for a specific network request or event
+  const [req] = await Promise.all([
+    // Example: waiting for a specific network request (like a video stream) - adjust the condition to your needs
+    page.waitForRequest(request => request.url().includes('.m3u8'), { timeout: 200000 }),
+    page.goto(url, { waitUntil: 'load' })  // Load the page
+  ]);
+
+  await page.waitForSelector(".movie-btn", { visible: true, timeout: 30000 });
 
   for (let i = 0; i < 50; i++) {
     await page.bringToFront();
     let btn = await page.$(".movie-btn");
+
     if (btn) {
-      await btn.click(); // Await the click
+      btn.click(); // Click the button without await as per your working example
     }
-    await sleep(1000); // Ensure sleep function is defined elsewhere
+
+    await page.waitForTimeout(1000); // Standard delay between operations
   }
 } catch (error) {
-  return res.status(500).end(`Server Error, check the params.`); // Ensure `res` is defined
+  console.error(`[x] ${error.message}`);
+  return res.status(500).end('Server Error, check the params.');
 }
 
 
