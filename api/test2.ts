@@ -50,20 +50,24 @@ export default async (req, res) => {
 
   // create browser based on ENV
   let browser;
-  if (isProd) {
+  //if (isProd) {
     browser = await puppeteer.launch({
-      args: chrome.args,
+      args: [
+    '--no-sandbox',
+    '--disable-web-security',
+  ],
       defaultViewport: chrome.defaultViewport,
-      executablePath: await chrome.executablePath(),
-      headless: false,
+      executablePath: process.env.PUPPETEER_EXEC_PATH || await chrome.executablePath(),
+      headless: true,
       ignoreHTTPSErrors: true
     });
-  } else {
-    browser = await puppeteer.launch({
-      headless: false,
-      executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    });
-  }
+  //} 
+  //else {
+    //browser = await puppeteer.launch({
+      //headless: false,
+      //executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    //});
+  //}
   const page = await browser.newPage();
   await page.setRequestInterception(true);
   await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36');
