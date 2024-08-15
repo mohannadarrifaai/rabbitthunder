@@ -49,7 +49,7 @@ export default async (req, res) => {
   const isProd = process.env.NODE_ENV === 'production';
 
   // create browser based on ENV
-  //let browser;
+  let browser;
     const args = [
     '--no-sandbox',
     '--disable-web-security',
@@ -61,7 +61,7 @@ export default async (req, res) => {
     headless: true,
   };
 
-  const browser = await puppeteer.launch(options);
+  browser = await puppeteer.launch(options);
   //if (isProd) {
     //browser = await puppeteer.launch({
       //args: chrome.args,
