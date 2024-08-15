@@ -87,34 +87,47 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 } 
   
-try {
-  // Use Promise.all to wait for both the page to load and for a specific network request or event
-  const [req] = await Promise.all([
-    // Example: waiting for a specific network request (like a video stream) - adjust the condition to your needs
-    page.waitForRequest(request => request.url().includes('.m3u8'), { timeout: 200000 }),
-    page.goto(url, { waitUntil: 'load' })  // Load the page
-  ]);
+function yourFunction(page: Page, browser: Browser): Promise<any> {
+  return new Promise(async (resolve) => {
+    try {
+      await page.goto("https://vidsrc.xyz/embed/tv?imdb=tt1190634&season=1&episode=1", { waitUntil: 'networkidle0' });
+      await page.waitForSelector("#pl_but", { visible: true });
 
-  await page.waitForSelector(".movie-btn", { visible: true, timeout: 30000 });
-
-  for (let i = 0; i < 50; i++) {
-    await page.bringToFront();
-    let btn = await page.$(".movie-btn");
-
-    if (btn) {
-      btn.click(); // Click the button without await as per your working example
+      for (let i = 0; i < 50; i++) {
+        await page.bringToFront();
+        const btn = await page.$("#pl_but"); // TypeScript infers btn as ElementHandle<Element> | null
+        if (btn) {
+          await btn.click(); // Await click to ensure it's executed properly
+        }
+        await sleep(1000); // Assuming sleep is correctly typed
+      }
+    } catch (e) {
+      console.log(`[x] ${(e as Error).message}`); // Cast e to Error to access the message property
     }
 
-    await page.waitForTimeout(1000); // Standard delay between operations
-  }
-} catch (error) {
-  console.error(`[x] ${error.message}`);
-  return res.status(500).end('Server Error, check the params.');
+    if (browser) {
+      await sleep(config.MAX_TIMEOUT); // config should be properly typed
+      await browser.close();
+    }
+    resolve(keys); // keys should be properly typed or use `resolve<any>(keys);`
+  });
 }
 
+try {
+    // Call your function and wait for it to resolve
+    const result = await yourFunction(page, browser);
 
-  await browser.close();
-
+    // Handle the result if necessary
+    console.log('Function result:', result);
+  } catch (error) {
+    console.error('An error occurred:', error);
+  } finally {
+    // Ensure the browser is closed if it wasn't closed in yourFunction
+    if (browser && browser.isConnected()) {
+      await browser.close();
+    }
+  }
+}
   console.log(finalResponse);
   res.json(logger);
 };
