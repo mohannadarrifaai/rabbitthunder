@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer-extra');
-const {executablePath} = require('puppeteer')
+//const {executablePath} = require('puppeteer')
 const chrome = require('@sparticuz/chromium');
 
 // Stealth plugin issue - There is a good fix but currently this works.
@@ -59,10 +59,11 @@ export default async (req, res) => {
   ],
       defaultViewport: chrome.defaultViewport,
       //executablePath:process.env.PUPPETEER_EXEC_PATH,
-      //executablePath:(puppeteer as any).executablePath();
-      executablePath:executablePath(),
-      //executablePath:require('puppeteer').executablePath()
-      //executablePath:require('puppeteer-extra-plugin-stealth').executablePath()
+      //executablePath:(puppeteer as any).executablePath(),
+      //executablePath:executablePath(),
+      executablePath:await chrome.executablePath(),
+      //executablePath:require('puppeteer').executablePath(),
+      //executablePath:require('puppeteer-extra-plugin-stealth').executablePath(),
       headless: true,
       ignoreHTTPSErrors: true
     });
