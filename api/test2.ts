@@ -56,9 +56,9 @@ export default async (req, res) => {
   ];
 
   const options = {
-    args:args,
+    args:chrome.args,
     executablePath: await chrome.executablePath(),
-    headless: true,
+    headless: false,
   };
 
   browser = await puppeteer.launch(options);
