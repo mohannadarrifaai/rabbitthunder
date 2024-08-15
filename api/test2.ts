@@ -49,20 +49,32 @@ export default async (req, res) => {
   const isProd = process.env.NODE_ENV === 'production';
 
   // create browser based on ENV
-  let browser;
+  //let browser;
+    const args = [
+    '--no-sandbox',
+    '--disable-web-security',
+  ];
+
+  const options = {
+    args,
+    executablePath: await puppeteer.executablePath(),
+    headless: true,
+  };
+
+  const browser = await puppeteer.launch(options);
   //if (isProd) {
-    browser = await puppeteer.launch({
-      args: chrome.args,
-      defaultViewport: chrome.defaultViewport,
+    //browser = await puppeteer.launch({
+      //args: chrome.args,
+      //defaultViewport: chrome.defaultViewport,
       //executablePath:process.env.PUPPETEER_EXEC_PATH,
-      executablePath:(puppeteer as any).executablePath(),
+      //executablePath:(puppeteer as any).executablePath(),
       //executablePath:await executablePath(),
       //executablePath:await chrome.executablePath(),
       //executablePath:await require('puppeteer').executablePath(),
       //executablePath:require('puppeteer-extra-plugin-stealth').executablePath(),
-      headless: true,
-      ignoreHTTPSErrors: true
-    });
+      //headless: true,
+      //ignoreHTTPSErrors: true
+    //});
   //} 
   //else {
     //browser = await puppeteer.launch({
