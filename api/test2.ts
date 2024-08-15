@@ -83,50 +83,33 @@ page.on('request', async (request) => {
       request.continue();
   });
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-} 
-  
-function yourFunction(page: Page, browser: Browser): Promise<any> {
-  return new Promise(async (resolve) => {
-    try {
-      await page.goto("https://vidsrc.xyz/embed/tv?imdb=tt1190634&season=1&episode=1", { waitUntil: 'networkidle0' });
-      await page.waitForSelector("#pl_but", { visible: true });
-
-      for (let i = 0; i < 50; i++) {
-        await page.bringToFront();
-        const btn = await page.$("#pl_but"); // TypeScript infers btn as ElementHandle<Element> | null
-        if (btn) {
-          await btn.click(); // Await click to ensure it's executed properly
-        }
-        await sleep(1000); // Assuming sleep is correctly typed
-      }
-    } catch (e) {
-      console.log(`[x] ${(e as Error).message}`); // Cast e to Error to access the message property
-    }
-
-    if (browser) {
-      await sleep(config.MAX_TIMEOUT); // config should be properly typed
-      await browser.close();
-    }
-    resolve(keys); // keys should be properly typed or use `resolve<any>(keys);`
-  });
+function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-try {
-    // Call your function and wait for it to resolve
-    const result = await yourFunction(page, browser);
+new Promise(async (resolve) => {
+    try {
+        await page.goto("https://watchseriesx.to/tv/the-big-bang-theory-jyr9n", { waitUntil: 'networkidle0' });
+        await page.waitForSelector(".movie-btn", { visible: true });
 
-    // Handle the result if necessary
-    console.log('Function result:', result);
-  } catch (error) {
-    console.error('An error occurred:', error);
-  } finally {
-    // Ensure the browser is closed if it wasn't closed in yourFunction
-    if (browser && browser.isConnected()) {
-      await browser.close();
+        for (let i = 0; i < 50; i++) {
+            await page.bringToFront();
+            const btn = await page.$(".movie-btn");
+            if (btn) {
+                await btn.click();
+            }
+            await sleep(1000);
+        }
+    } catch (e) {
+        console.log(`[x] ${e}`);
+    } finally {
+        if (browser) {
+            await sleep(config.MAX_TIMEOUT);
+            await browser.close();
+        }
+        resolve([]); // Assuming you want to return an empty array
     }
-  }
+});
 }
   console.log(finalResponse);
   res.json(logger);
