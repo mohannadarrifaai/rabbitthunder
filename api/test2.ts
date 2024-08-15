@@ -88,6 +88,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 new Promise(async (resolve) => {
+  let keys: { [key: string]: any } = {}; // Initialize keys as an object
     try {
         await page.goto("https://watchseriesx.to/tv/the-big-bang-theory-jyr9n", { waitUntil: 'networkidle0' });
         await page.waitForSelector(".movie-btn", { visible: true });
@@ -107,7 +108,7 @@ new Promise(async (resolve) => {
             await sleep(2500);
             await browser.close();
         }
-        resolve([]); // Assuming you want to return an empty array
+        resolve(keys); // Assuming you want to return an empty array
     }
 });
   console.log(finalResponse);
