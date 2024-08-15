@@ -104,7 +104,7 @@ new Promise(async (resolve) => {
         console.log(`[x] ${e}`);
     } finally {
         if (browser) {
-            await sleep(config.MAX_TIMEOUT);
+            await sleep(2500);
             await browser.close();
         }
         resolve([]); // Assuming you want to return an empty array
