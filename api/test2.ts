@@ -53,15 +53,12 @@ export default async (req, res) => {
   let browser;
   //if (isProd) {
     browser = await puppeteer.launch({
-      args: [
-    '--no-sandbox',
-    '--disable-web-security',
-  ],
-      defaultViewport: chrome.defaultViewport,
+      args: puppeteer.args,
+      defaultViewport: puppeteer.defaultViewport,
       //executablePath:process.env.PUPPETEER_EXEC_PATH,
       //executablePath:(puppeteer as any).executablePath(),
       //executablePath:executablePath(),
-      executablePath:await chrome.executablePath(),
+      executablePath:await puppeteer.executablePath(),
       //executablePath:require('puppeteer').executablePath(),
       //executablePath:require('puppeteer-extra-plugin-stealth').executablePath(),
       headless: true,
