@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer-extra');
-const {executablePath} = require('puppeteer')
+const {executablePath} = require('puppeteer');
 const chrome = require('@sparticuz/chromium');
 
 // Stealth plugin issue - There is a good fix but currently this works.
