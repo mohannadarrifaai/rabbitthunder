@@ -58,8 +58,8 @@ export default async (req, res) => {
       //executablePath:process.env.PUPPETEER_EXEC_PATH,
       //executablePath:(puppeteer as any).executablePath(),
       //executablePath:executablePath(),
-      executablePath:await chrome.executablePath(),
-      //executablePath:require('puppeteer').executablePath(),
+      //executablePath:await chrome.executablePath(),
+      executablePath:require('puppeteer').executablePath(),
       //executablePath:require('puppeteer-extra-plugin-stealth').executablePath(),
       headless: true,
       ignoreHTTPSErrors: true
