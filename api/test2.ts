@@ -42,9 +42,10 @@ export default async (req, res) => {
 
   // Some checks...
   if (!body) return res.status(400).end(`No body provided`);
-  if (typeof body === 'object' && !body.id) return res.status(400).end(`No url provided`);
+  if (typeof body === 'object' && !body.url) return res.status(400).end(`No url provided`);
 
-  const id = body.id;
+  const url = body.url;
+  const referer = body.referer || '';
   const isProd = process.env.NODE_ENV === 'production';
 
   // create browser based on ENV
@@ -54,73 +55,42 @@ export default async (req, res) => {
       args: chrome.args,
       defaultViewport: chrome.defaultViewport,
       executablePath: await chrome.executablePath(),
-      headless: true,
+      headless: false,
       ignoreHTTPSErrors: true
     });
   } else {
     browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     });
   }
-  let keys = {};
   const page = await browser.newPage();
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
-  await page.setViewport({
-    width: 1080,
-    height: 1080
-  })
-  // Set headers, else wont work.
-  await page.setExtraHTTPHeaders({ 'Referer': 'https://vidsrc.xyz/'});
-
   await page.setRequestInterception(true);
+  await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36');
+
+  // Set headers, else wont work.
+  await page.setExtraHTTPHeaders({ 'Referer': referer});
+
   const logger = [];
   const finalResponse = { source: []};
-  page.on('request', async (request) => {
-    logger.push(request.url());
-    if (request.url().includes('.m3u8')) finalResponse.source.push(request.url());
-    console.log(request.url());
-      request.continue();
-  });
-  return new Promise(async (resolve) => {
 
-    await page.goto("https://vidsrc.xyz/embed/tv?imdb=tt1190634&season=1&episode=1", { waitUntil: 'networkidle0' });
-    // await page.waitForSelector("#pl_but",  { visible: true });
-    try {
-      for (let i = 0; i < 50; i++) {
-        // await page.bringToFront();
-        // let btn = await page.$("#pl_but");
-        // if (btn) {
-          const viewport = await page.viewport();
-          await page.mouse.click(viewport.width / 2, viewport.height / 2);
-      // }
-        await sleep(1000);
-    }
-    }
-    catch (e) {
-        console.log(`[x] ${e}`);
-    }
-
-    if (browser) {
-      await sleep(config.MAX_TIMEOUT);
-      await browser.close();
-    }
-    resolve(keys);
+  page.on('request', async (interceptedRequest) => {
+    logger.push(interceptedRequest.url());
+    if (interceptedRequest.url().includes('.m3u8')) finalResponse.source.push(interceptedRequest.url());
+    interceptedRequest.continue();
   });
 
-}
+  try {
+    const [req] = await Promise.all([
+      //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
+      page.goto(url, { waitUntil: 'load' }),
+    ]);
+  } catch (error) {
+    return res.status(500).end(`Server Error,check the params.`)
+  }
 
-  // Response headers.
-  res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate');
-  res.setHeader('Content-Type', 'application/json');
-  // CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  await browser.close();
+
   console.log(finalResponse);
   res.json(logger);
 };
