@@ -83,23 +83,26 @@ page.on('request', async (request) => {
       request.continue();
   });
 
-  try {
-    const [req] = await Promise.all([
-      //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
-      page.goto(url, { waitUntil: 'networkidle0' }),
-      await page.waitForSelector(".movie-btn",  { visible: true });
-      for (let i = 0; i < 50; i++) {
-        await page.bringToFront();
-        let btn = await page.$(".movie-btn");
-        if (btn) {
-          btn.click();
-      }
-        await sleep(1000);
-    }      
-    ]);
-  } catch (error) {
-    return res.status(500).end(`Server Error,check the params.`)
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+} 
+  
+try {
+  await page.goto(url, { waitUntil: 'networkidle0' });
+  await page.waitForSelector(".movie-btn", { visible: true });
+
+  for (let i = 0; i < 50; i++) {
+    await page.bringToFront();
+    let btn = await page.$(".movie-btn");
+    if (btn) {
+      await btn.click(); // Await the click
+    }
+    await sleep(1000); // Ensure sleep function is defined elsewhere
   }
+} catch (error) {
+  return res.status(500).end(`Server Error, check the params.`); // Ensure `res` is defined
+}
+
 
   await browser.close();
 
