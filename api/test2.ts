@@ -110,7 +110,6 @@ new Promise(async (resolve) => {
         resolve([]); // Assuming you want to return an empty array
     }
 });
-}
   console.log(finalResponse);
   res.json(logger);
 };
