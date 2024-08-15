@@ -57,7 +57,7 @@ export default async (req, res) => {
     '--disable-web-security',
   ],
       defaultViewport: chrome.defaultViewport,
-      executablePath: process.env.PUPPETEER_EXEC_PATH || await chrome.executablePath(),
+      executablePath:await chrome.executablePath(),
       headless: true,
       ignoreHTTPSErrors: true
     });
