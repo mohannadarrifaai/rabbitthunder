@@ -70,7 +70,7 @@ export default async (req, res) => {
   //}
   const page = await browser.newPage();
   await page.setRequestInterception(true);
-  await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36');
+  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36; PlayStation');
 
   // Set headers, else wont work.
   await page.setExtraHTTPHeaders({ 'Referer': referer});
