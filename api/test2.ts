@@ -86,7 +86,16 @@ page.on('request', async (request) => {
   try {
     const [req] = await Promise.all([
       //page.waitForRequest(req => req.url().includes('.m3u8'), { timeout: 200000 }),
-      page.goto(url, { waitUntil: 'load' }),
+      page.goto(url, { waitUntil: 'networkidle0' }),
+      await page.waitForSelector(".movie-btn",  { visible: true });
+      for (let i = 0; i < 50; i++) {
+        await page.bringToFront();
+        let btn = await page.$(".movie-btn");
+        if (btn) {
+          btn.click();
+      }
+        await sleep(1000);
+    }      
     ]);
   } catch (error) {
     return res.status(500).end(`Server Error,check the params.`)
