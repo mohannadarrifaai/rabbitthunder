@@ -50,14 +50,14 @@ export default async (req, res) => {
 
   // create browser based on ENV
   let browser;
-    const args = [
+    const args1 = [
     '--no-sandbox',
     '--disable-web-security',
   ];
 
   const options = {
-    args:chrome.args,
-    executablePath: await puppeteer.executablePath(),
+    args:args1,
+    executablePath: await chrome.executablePath(),
     headless: false,
   };
 
