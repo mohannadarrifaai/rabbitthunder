@@ -108,12 +108,12 @@ function sleep(ms: number): Promise<void> {
 //new Promise(async (resolve) => {
   //let keys: { [key: string]: any } = {}; // Initialize keys as an object
     try {
-        await page.goto("https://watchseriesx.to/tv/the-big-bang-theory-jyr9n", { waitUntil: 'networkidle0' });
-        await page.waitForSelector(".movie-btn", { visible: true });
+        await page.goto("https://vidsrc2.to/embed/movie/385687", { waitUntil: 'networkidle0' });
+        await page.waitForSelector("#btn-play", { visible: true });
 
         for (let i = 0; i < 50; i++) {
             await page.bringToFront();
-            const btn = await page.$(".movie-btn");
+            const btn = await page.$("#btn-play");
             if (btn) {
                 await btn.click();
             }
