@@ -69,11 +69,11 @@ export default async (req, res) => {
   page.on('request', async (request) => {
 	return new Promise(async (resolve) => {
     await page.goto(url, { waitUntil: 'networkidle0' });
-    await page.waitForSelector("#btn-play", { timeout: 500000 });
+    await page.waitForSelector("#player > div > div > div.css-f61ful > button:nth-child(2) > svg > path", { timeout: 20000 });
     try {
       for (let i = 0; i < 5; i++) {
         await page.bringToFront();
-        let btn = await page.$("#btn-play");
+        let btn = await page.$("#player > div > div > div.css-f61ful > button:nth-child(2) > svg > path");
         if (btn) {
           btn.click();
       }
